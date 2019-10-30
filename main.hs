@@ -33,8 +33,7 @@ data Input = I Range Int [Tarp]
 -- 5. Repeat 3 and 4 until there are no tarps left
 -- 6. Check: Does it land in the interval?
 
-upmostTarp :: [Tarp] -> Tarp
-upmostTarp ts = undefined
+
 
 -- Check whether two tarps overlap and tell the overlapping range
 overlap :: Tarp -> Tarp -> Maybe Range
@@ -44,3 +43,7 @@ overlap (T (a,_) (b,_)) (T (c,_) (d,_))
     | (min a b) <= (min c d) && (max a b) >= (min c d) = Just (min c d,max a b)
     | (min a b) >= (min c d) && (min a b) <= (max c d) = Just (min a b,max c d)
     | otherwise                                        = Nothing
+
+-- Select of two tarps that which is topologically higher
+upper :: Tarp -> Tarp -> Tarp
+-- TODO: This is not easy without a lot of comparisons
