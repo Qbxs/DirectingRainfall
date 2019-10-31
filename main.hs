@@ -44,6 +44,11 @@ overlap (T (a,_) (b,_)) (T (c,_) (d,_))
     | (min a b) >= (min c d) && (min a b) <= (max c d) = Just (min a b,max c d)
     | otherwise                                        = Nothing
 
+
+
 -- Select of two tarps that which is topologically higher
+-- =(will be hit first vertically)
 upper :: Tarp -> Tarp -> Tarp
--- TODO: This is not easy without a lot of comparisons
+upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2)) = case (overlap t1 t2) of
+    Nothing    -> if a2 >= c2 then t1 else t2
+    Just (x,y) -> idk...
