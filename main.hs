@@ -67,13 +67,13 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == c1 && y == b1 && b2 >= c2
                   || x == d1 && y == a1 && a2 >= c2
                   || x == d1 && y == b1 && b2 >= d2
-                    -- here: all cases of total overlap
+                    -- here: all cases of total overlap where t1 is higher
                   || x == a1 && y == b1 && a2 >= c2
                   || x == b1 && y == a1 && a2 >= c2
                   || x == c1 && y == d1 && b2 >= d2
                   || x == d1 && y == c1 && b2 >= d2 then t1 else t2
 
--- TODO: implement a topsort to find out the order of reachable tarps
+-- TODO: implement a topsort to find out the order of reachable
 
 
 
