@@ -6,7 +6,8 @@ type Point = (Int,Int)
 -- interval from a to b (isomorph to Point)
 type Range = (Int,Int)
 
--- tarp consisting of a line connecting two points
+-- tarp consisting of a line connecting two points T (a1,a2) (b1,b2)
+-- with a2 < b2
 data Tarp = T Point Point
   deriving(Show,Eq)
 
@@ -56,4 +57,23 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
     Nothing    -> if a2 >= c2 then t1 else t2
     Just (x,y) -> if a2 >= d2 then t1 else
                   if c2 >= b2 then t2 else
-                  if -- TODO: all overlapping cases (5)
+                    -- here: all cases for which t1 overlaps t2 partially
+                    -- consider all combinations of {a,b} x {c,d} => 8
+                  if x == a1 && y == c1 && a2 >= c2
+                  || x == a1 && y == d1 && b2 >= d2
+                  || x == b1 && y == c1 && b2 >= c2
+                  || x == b1 && y == d1 && b2 >= d2
+                  || x == c1 && y == a1 && a2 >= c2
+                  || x == c1 && y == b1 && b2 >= c2
+                  || x == d1 && y == a1 && a2 >= c2
+                  || x == d1 && y == b1 && b2 >= d2
+                    -- here: all cases of total overlap
+                  || x == a1 && y == b1 && a2 >= c2
+                  || x == b1 && y == a1 && a2 >= c2
+                  || x == c1 && y == d1 && b2 >= d2
+                  || x == d1 && y == c1 && b2 >= d2 then t1 else t2
+
+
+
+main :: IO()
+main = putStrLn "Compiled succesfully so far."
