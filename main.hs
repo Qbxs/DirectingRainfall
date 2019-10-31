@@ -15,8 +15,11 @@ data Tarp = T Point Point
 -- Range of vineyard (a,b)
 -- N° of tarps n
 -- List of tarps ts
-data Input = I Range Int [Tarp]
-  deriving(Show)
+data Input = Input
+  { vineyard :: Range
+  , noTarps  :: Int
+  , tarps    :: [Tarp]
+  } deriving(Show)
 
 
 -- Algorithm∷
