@@ -35,20 +35,25 @@ data Input = I Range Int [Tarp]
 
 
 
--- Check whether two tarps overlap and tell the overlapping range
-overlap :: Tarp -> Tarp -> Maybe Range
-overlap (T (a,_) (b,_)) (T (c,_) (d,_))
-    | (min a b) <= (min c d) && (max a b) >= (max c d) = Just (min c d,max c d)
-    | (min a b) >= (min c d) && (max a b) <= (max c d) = Just (min a b,max a b)
-    | (min a b) <= (min c d) && (max a b) >= (min c d) = Just (min c d,max a b)
-    | (min a b) >= (min c d) && (min a b) <= (max c d) = Just (min a b,max c d)
-    | otherwise                                        = Nothing
+-- Check whether two ranges overlap and return overlapping range
+overlap :: Range -> Range -> Maybe Range
+overlap (a,b) (c,d) | a <= c && b >= d = Just (c,d)
+                    | a >= c && b <= d = Just (a,b)
+                    | a <= c && b >= c = Just (c,b)
+                    | a >= c && a <= d = Just (a,d)
+                    | otherwise        = Nothing
 
+
+tarpRange :: Tarp -> Range
+tarpRange (T (a,_) (b,_)) = (min a b,max a b)
 
 
 -- Select of two tarps that which is topologically higher
 -- =(will be hit first vertically)
 upper :: Tarp -> Tarp -> Tarp
-upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2)) = case (overlap t1 t2) of
+upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
+  = case overlap (tarpRange t1) (tarpRange t2) of
     Nothing    -> if a2 >= c2 then t1 else t2
-    Just (x,y) -> idk...
+    Just (x,y) -> if a2 >= d2 then t1 else
+                  if c2 >= b2 then t2 else
+                  if -- TODO: all overlapping cases (5)
