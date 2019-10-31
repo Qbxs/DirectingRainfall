@@ -73,7 +73,12 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == c1 && y == d1 && b2 >= d2
                   || x == d1 && y == c1 && b2 >= d2 then t1 else t2
 
--- TODO: implement a topsort to find out the order of reachable
+-- TODO: implement a topsort to find out the order of reachable tarps
+-- Steps: - Look for highest Tarp (= tarp with highest upper point) which is
+--          also in our [a,b] interval
+--        -> First Element of topsorted tarps (ignore everything before)
+--        - Add tarps in a graph together with minimal cost to reach
+--        - when finished add [a,b] interval as final node + connect accordingly
 
 
 
