@@ -76,6 +76,25 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == c1 && y == d1 && b2 >= d2
                   || x == d1 && y == c1 && b2 >= d2 then t1 else t2
 
+
+-- use these babies to sort all tarps
+isUpper :: Tarp -> Tarp -> Bool
+isUpper t1 t2 | upper t1 t2 == t1 = True
+              | otherwise         = False
+
+-- this does not do the trick :(
+quicksort :: (a -> a -> Bool) -> [a] -> [a]
+quicksort p []     = []
+quicksort p (x:xs) = lesser ++ [x] ++ greater
+             where lesser = quicksort p [a | a <- xs, p x a]
+                   greater = quicksort p [a | a <- xs, p a x]
+
+
+-- new type for tarps, split into intervals with cost to reach
+type WeightedTarp = (Tarp,[(Range,Int)])
+
+
+
 -- TODO: implement a topsort to find out the order of reachable tarps
 -- Steps: - Look for highest Tarp (= tarp with highest upper point) which is
 --          also in our [a,b] interval
