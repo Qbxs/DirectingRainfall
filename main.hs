@@ -1,28 +1,7 @@
 import Data.List
+import InputParser
 
--- point with x,y coordinates
-type Point = (Int,Int)
-
--- interval from a to b (isomorph to Point)
-type Range = (Int,Int)
-
--- tarp consisting of a line connecting two points T (a1,a2) (b1,b2)
--- with a2 < b2
-data Tarp = T Point Point
-  deriving(Show,Eq)
-
--- complete input:
--- Range of vineyard (a,b)
--- N° of tarps n
--- List of tarps ts
-data Input = Input
-  { vineyard  :: Range
-  , noOfTarps :: Int
-  , tarps     :: [Tarp]
-  } deriving(Show)
-
-
--- Algorithm∷
+-- Algorithm:
 -- 1. Find upmost tarp (= tarp which has no tarp above it at any point)
 -- 2. Is it in the interval?
 --    - Yes: Cost to reach = 0
@@ -86,12 +65,21 @@ isUpper t1 t2 | upper t1 t2 == t1 = True
 quicksort :: (a -> a -> Bool) -> [a] -> [a]
 quicksort p []     = []
 quicksort p (x:xs) = lesser ++ [x] ++ greater
-             where lesser = quicksort p [a | a <- xs, p x a]
-                   greater = quicksort p [a | a <- xs, p a x]
+             where lesser = quicksort p [a | a <- xs, p a x]
+                   greater = quicksort p [a | a <- xs, p x a]
+
+bubbleSort :: (a -> a -> Bool) -> [a] -> [a]
+bubbleSort p []       = []
+bubbleSort p [x]      = [x]
+bubbleSort p (x:y:xs) | p x y     = x:(bubbleSort p (y:xs))
+                      | otherwise = y:(bubbleSort p (x:xs))
 
 
 -- new type for tarps, split into intervals with cost to reach
 type WeightedTarp = (Tarp,[(Range,Int)])
+
+-- orientation of tarp
+data Orientation = Left | Right
 
 
 
@@ -105,4 +93,6 @@ type WeightedTarp = (Tarp,[(Range,Int)])
 
 
 main :: IO()
-main = putStrLn "Compiled succesfully so far."
+main = do
+  i <- readFile "input.hs"
+  (print . inputParser . lexer) i
