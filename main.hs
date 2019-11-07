@@ -72,11 +72,17 @@ sortInput :: Input -> [Tarp]
 sortInput (Input _ _ ts) = quicksort isUpper ts
 
 
--- new type for tarps, split into intervals with cost to reach
-type WeightedTarp = (Tarp,[(Range,Int)])
 
--- orientation of tarp
-data Orientation = Left | Right
+
+-- simplified tarp after sort sithout y-coordinates: (x1,x2)
+-- if x1<x2 then tarp goes to the left else to the right
+type SimpleTarp = (Int,Int)
+
+type Cost = Int
+
+-- new type for tarps, split into intervals with cost to reach
+type WeightedTarp = (SimpleTarp,[(Range,Cost)])
+
 
 
 
@@ -91,6 +97,6 @@ data Orientation = Left | Right
 
 main :: IO()
 main = do
-  i <- readFile "input.hs"
+  i <- readFile "input3.hs"
   (print . inputParser . lexer) i
   (print . sortInput . inputParser . lexer) i
