@@ -97,6 +97,6 @@ type WeightedTarp = (SimpleTarp,[(Range,Cost)])
 
 main :: IO()
 main = do
-  i <- readFile "input1.hs"
+  i <- readFile "inputFiles/input1.hs"
   (print . inputParser . lexer) i
   (print . sortInput . inputParser . lexer) i
