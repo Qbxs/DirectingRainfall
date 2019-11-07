@@ -68,11 +68,8 @@ quicksort p (x:xs) = lesser ++ [x] ++ greater
              where lesser = quicksort p [a | a <- xs, p a x]
                    greater = quicksort p [a | a <- xs, p x a]
 
-bubbleSort :: (a -> a -> Bool) -> [a] -> [a]
-bubbleSort p []       = []
-bubbleSort p [x]      = [x]
-bubbleSort p (x:y:xs) | p x y     = x:(bubbleSort p (y:xs))
-                      | otherwise = y:(bubbleSort p (x:xs))
+sortInput :: Input -> [Tarp]
+sortInput (Input _ _ ts) = quicksort isUpper ts
 
 
 -- new type for tarps, split into intervals with cost to reach
@@ -96,3 +93,4 @@ main :: IO()
 main = do
   i <- readFile "input.hs"
   (print . inputParser . lexer) i
+  (print . sortInput . inputParser . lexer) i
