@@ -66,7 +66,7 @@ quicksort :: (a -> a -> Bool) -> [a] -> [a]
 quicksort p []     = []
 quicksort p (x:xs) = lesser ++ [x] ++ greater
              where lesser = quicksort p [a | a <- xs, p a x]
-                   greater = quicksort p [a | a <- xs, p x a]
+                   greater = quicksort p [a | a <- xs, not $ p a x]
 
 sortInput :: Input -> [Tarp]
 sortInput (Input _ _ ts) = quicksort isUpper ts
@@ -97,6 +97,6 @@ type WeightedTarp = (SimpleTarp,[(Range,Cost)])
 
 main :: IO()
 main = do
-  i <- readFile "inputFiles/input1.hs"
+  i <- readFile "inputFiles/input3.hs"
   (print . inputParser . lexer) i
   (print . sortInput . inputParser . lexer) i
