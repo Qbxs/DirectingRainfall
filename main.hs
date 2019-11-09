@@ -2,7 +2,7 @@ import Data.List
 import InputParser
 
 -- Algorithm:
--- 1. Find upmost tarp (= tarp which has no tarp above it at any point)
+-- 1. Find upmost tarp which has no tarp above it at any point
 -- 2. Is it in the interval?
 --    - Yes: Cost to reach = 0
 --    - No: Cost to reach = inf
@@ -39,8 +39,8 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
     Nothing    -> if a2 >= c2 then t1 else t2
     Just (x,y) -> if a2 >= d2 then t1 else
                   if c2 >= b2 then t2 else
-                    -- here: all cases for which t1 overlaps t2 partially
-                    -- consider all combinations of {a,b} x {c,d} => 8
+             -- here: all cases for which t1 overlaps t2 partially
+             -- consider all combinations of {a,b} x {c,d} => 8
                   if x == a1 && y == c1 && a2 >= c2
                   || x == a1 && y == d1 && b2 >= d2
                   || x == b1 && y == c1 && b2 >= c2
@@ -49,7 +49,7 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == c1 && y == b1 && b2 >= c2
                   || x == d1 && y == a1 && a2 >= c2
                   || x == d1 && y == b1 && b2 >= d2
-                    -- here: all cases of total overlap where t1 is higher
+             -- here: all cases of total overlap where t1 is higher
                   || x == a1 && y == b1 && a2 >= c2
                   || x == b1 && y == a1 && a2 >= c2
                   || x == c1 && y == d1 && b2 >= d2
@@ -65,17 +65,26 @@ isUpper t1 t2 | upper t1 t2 == t1 = True
 quicksort :: (a -> a -> Bool) -> [a] -> [a]
 quicksort p []     = []
 quicksort p (x:xs) = lesser ++ [x] ++ greater
-             where lesser = quicksort p [a | a <- xs, p a x]
-                   greater = quicksort p [a | a <- xs, not $ p a x]
+             where lesser = quicksort p [a | a <- xs, not $ p x a]
+                   greater = quicksort p [a | a <- xs, p x a]
+
+-- less eficient but safe sort (isUpper is not transitive)
+maxSort :: (a -> a -> Bool) -> [a] -> [a]
+maxSort p [] = []
+maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
+         where maxList [x]      = (x,[])
+               maxList (x:xs) = if p x (fst $ maxList xs)
+                                then (x,(fst $ maxList xs):(snd $ maxList xs))
+                                else (fst $ maxList xs,x:(snd $ maxList xs))
 
 sortInput :: Input -> [Tarp]
-sortInput (Input _ _ ts) = quicksort isUpper ts
+sortInput (Input _ _ ts) = maxSort isUpper ts
 
 
 
 
--- simplified tarp after sort sithout y-coordinates: (x1,x2)
--- if x1<x2 then tarp goes to the left else to the right
+-- simplified tarp after sort without y-coordinates: (x1,x2)
+-- if x1<x2 then tarp points to the left else to the right
 type SimpleTarp = (Int,Int)
 
 type Cost = Int
