@@ -77,21 +77,34 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
                                 then (x,(fst $ maxList xs):(snd $ maxList xs))
                                 else (fst $ maxList xs,x:(snd $ maxList xs))
 
+-- lowest first
 sortInput :: Input -> [Tarp]
-sortInput (Input _ _ ts) = maxSort isUpper ts
+sortInput (Input _ _ ts) = reverse $ maxSort isUpper ts
 
 
 
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
 -- if x1<x2 then tarp points to the left else to the right
-type SimpleTarp = (Int,Int)
+data SimpleTarp = S (Int,Int) Orientation
+  deriving (Show, Eq)
+data Orientation = L | R
+  deriving (Show,Eq)
+
+simplify :: Tarp -> SimpleTarp
+simplify (T (x1,_) (x2,_)) = S (min x1 x2, max x1 x2) $ if x1 < x2 then L else R
 
 type Cost = Int
 
 -- new type for tarps, split into intervals with cost to reach
 type WeightedTarp = (SimpleTarp,[(Range,Cost)])
 
+weigh :: Range -> [SimpleTarp] -> [WeightedTarp]
+weigh _     []            = []
+weigh (a,b) [S (x1,x2) o]
+         = case overlap (min x1 x2,max x1 x2) (a,b) of
+                      Nothing    -> []
+                      Just (x,y) -> [] --placeholder
 
 
 
