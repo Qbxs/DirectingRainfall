@@ -86,7 +86,7 @@ sortInput (Input _ _ ts) = reverse $ maxSort isUpper ts
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
 -- if x1<x2 then tarp points to the left else to the right
-data SimpleTarp = S (Int,Int) Orientation
+data SimpleTarp = S Range Orientation
   deriving (Show, Eq)
 data Orientation = L | R
   deriving (Show,Eq)
@@ -94,7 +94,8 @@ data Orientation = L | R
 simplify :: Tarp -> SimpleTarp
 simplify (T (x1,_) (x2,_)) = S (min x1 x2, max x1 x2) $ if x1 < x2 then L else R
 
-type Cost = Int
+-- cost can be an integer or nothing (=unreachable)
+type Cost = Maybe Int
 
 -- new type for tarps, split into intervals with cost to reach
 type WeightedTarp = (SimpleTarp,[(Range,Cost)])
@@ -102,7 +103,7 @@ type WeightedTarp = (SimpleTarp,[(Range,Cost)])
 weigh :: Range -> [SimpleTarp] -> [WeightedTarp]
 weigh _     []            = []
 weigh (a,b) [S (x1,x2) o]
-         = case overlap (min x1 x2,max x1 x2) (a,b) of
+         = case overlap (x1,x2) (a,b) of
                       Nothing    -> []
                       Just (x,y) -> [] --placeholder
 
