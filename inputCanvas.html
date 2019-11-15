@@ -1,0 +1,62 @@
+<<!DOCTYPE html>
+<html>
+  <head>
+      <title>Input Tarps</title>
+      <script type="text/javascript">
+        function draw(){
+          var c = document.getElementById("myCanvas");
+          var ctx = c.getContext("2d");
+          function drawLine(x1,y1,x2,y2){
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke(); // Draw it
+          }
+          var inp = [[32,50,12,60],
+                    [30,60,8,70],
+                    [25,70,0,80],
+                    [15,30,28,40],
+                    [5,20,14,25]];
+          ctx.lineWidth = 2;
+          inp = inp.map(x => x.map(y => 5*y));
+          for(x in inp){
+            inp[x][1]=600-inp[x][1];
+            inp[x][3]=600-inp[x][3];
+          }
+          for(a in inp){
+            drawLine(inp[a][0],inp[a][1],inp[a][2],inp[a][3]);
+          }
+          ctx.strokeStyle = "green";
+          drawLine(50,595,100,595);
+        }
+      </script>
+      <style type="text/css">
+        html, body {
+    			font-family: helvetica neue, helvetica, liberation sans,;
+    			font-size: 14px;
+    			height: 100%;
+    			width: 100%;
+    			padding: 0;
+    			margin: 0;
+    		}
+        h1 {
+    			opacity: 1;
+    			font-size: 20px;
+    			font-family: helvetica neue;
+    			font-weight: bold;
+    			margin-top: 0;
+    			padding: 4px;
+    		}
+    		p {
+    			padding-left: 22px;
+    		}
+        canvas { border: 1px solid black; }
+      </style>
+    </head>
+    <body onload="draw()">
+      <h1>Tarps</h1>
+      <canvas id="myCanvas" width="600" height="600">
+        Input Tarps
+      </canvas>
+    </body>
+</html>
