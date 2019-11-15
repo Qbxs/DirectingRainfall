@@ -1,4 +1,6 @@
 import Data.List
+import System.Environment
+import System.Exit
 import InputParser (Input(..), Range, Point, Tarp(..), lexer, inputParser)
 
 -- Algorithm:
@@ -107,10 +109,23 @@ weigh (a,b) ((S (x1,x2) o):xs) = []
 --        - Add tarps in a graph together with minimal cost to reach
 --        - when finished add [a,b] interval as final node + connect accordingly
 
+-- test for command line io
+main = getArgs >>= parse >>= (print . (map simplify) . sortInput . inputParser . lexer)
+
+parse ["-h"] = usage   >> exit
+parse ["-v"] = version >> exit
+parse []     = getContents
+parse fs     = concat `fmap` mapM readFile fs
+
+usage   = putStrLn "Usage: drf [-vh] [file ..]"
+version = putStrLn "Haskell drf 0.1"
+exit    = exitWith ExitSuccess
+die     = exitWith (ExitFailure 1)
 
 
-main :: IO()
-main = do
-  i <- readFile "inputFiles/input3.hs"
-  (print . inputParser . lexer) i
-  (print . (map simplify) . sortInput . inputParser . lexer) i
+
+-- main :: IO()
+-- main = do
+--   i <- readFile "inputFiles/input3.hs"
+--   (print . inputParser . lexer) i
+--   (print . (map simplify) . sortInput . inputParser . lexer) i
