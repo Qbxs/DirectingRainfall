@@ -1,11 +1,12 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
       <title>Input Tarps</title>
       <script type="text/javascript">
         function draw(){
-          var c = document.getElementById("myCanvas");
+          var c = document.getElementById("canvas");
           var ctx = c.getContext("2d");
+          const mult = 10; //multiplier for scaling, TODO: make this automated
           function drawLine(x1,y1,x2,y2){
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -18,16 +19,16 @@
                     [15,30,28,40],
                     [5,20,14,25]];
           ctx.lineWidth = 2;
-          inp = inp.map(x => x.map(y => 5*y));
+          inp = inp.map(x => x.map(y => mult*y));
           for(x in inp){
-            inp[x][1]=600-inp[x][1];
-            inp[x][3]=600-inp[x][3];
+            inp[x][1]=c.height-inp[x][1];
+            inp[x][3]=c.height-inp[x][3];
           }
           for(a in inp){
             drawLine(inp[a][0],inp[a][1],inp[a][2],inp[a][3]);
           }
           ctx.strokeStyle = "green";
-          drawLine(50,595,100,595);
+          drawLine(mult*10,c.height-5,mult*20,c.height-5);
         }
       </script>
       <style type="text/css">
@@ -38,10 +39,11 @@
     			width: 100%;
     			padding: 0;
     			margin: 0;
+          background-color: #f0f6ff;
     		}
         h1 {
     			opacity: 1;
-    			font-size: 20px;
+    			font-size: 32px;
     			font-family: helvetica neue;
     			font-weight: bold;
     			margin-top: 0;
@@ -55,7 +57,7 @@
     </head>
     <body onload="draw()">
       <h1>Tarps</h1>
-      <canvas id="myCanvas" width="600" height="600">
+      <canvas id="canvas" width="860" height="860">
         Input Tarps
       </canvas>
     </body>
