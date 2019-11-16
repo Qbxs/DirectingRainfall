@@ -1,24 +1,7 @@
 module Tarps where
 
 import Data.List
-import InputParser (Input(..), Range, Point, Tarp(..), lexer, inputParser)
-
--- Algorithm:
--- 1. Find upmost tarp which has no tarp above it at any point
--- 2. Is it in the interval?
---    - Yes: Cost to reach = 0
---    - No: Cost to reach = inf
--- 3. Find next upmost tarp:
--- 4. Is it (a) in the interval without any tarp above
---    OR (b) is it beneath the lower point of an upper tarp t?
---    - (a) Cost to reach = 0
---    - (b) Cost to reach = t
---    - Neither: if in interval of t, then cost to reach = t + 1
---    - else: cost to reach = inf
--- 5. Repeat 3 and 4 until there are no tarps left
--- 6. Check: Does it land in the interval?
-
-
+import InputParser (Input(..), Range, Point, Tarp(..))
 
 -- Check whether two ranges overlap and return overlapping range
 overlap :: Range -> Range -> Maybe Range
@@ -76,8 +59,6 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
 -- lowest first
 sortInput :: Input -> [Tarp]
 sortInput (Input _ _ ts) = reverse $ maxSort upper ts
-
-
 
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)

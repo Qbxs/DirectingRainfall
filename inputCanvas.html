@@ -8,6 +8,7 @@
           var ctx = c.getContext("2d");
           const mult = 10; //multiplier for scaling, TODO: make this automated
           ctx.strokeStyle = "white";
+          ctx.lineWidth = 2;
           function drawLine(x1,y1,x2,y2){
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -19,15 +20,15 @@
                     [25,70,0,80],
                     [15,30,28,40],
                     [5,20,14,25]];
-          ctx.lineWidth = 2;
           inp = inp.map(x => x.map(y => mult*y));
-          for(x in inp){
+          for(x in inp){ // Reverse y-coordinates
             inp[x][1]=c.height-inp[x][1];
             inp[x][3]=c.height-inp[x][3];
           }
           for(a in inp){
             drawLine(inp[a][0],inp[a][1],inp[a][2],inp[a][3]);
           }
+          ctx.lineWidth = 5;
           ctx.strokeStyle = "green";
           drawLine(mult*10,c.height-5,mult*20,c.height-5);
         }
