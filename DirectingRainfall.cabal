@@ -20,11 +20,11 @@ extra-source-files:  CHANGELOG.md, readme.md
 
 executable DirectingRainfall
   main-is:             drf.hs
-  -- other-modules:
+  other-modules:       InputParser, Tarps
   -- other-extensions:
   build-depends:       base >=4.13 && <4.14,
                        array,
                        process,
                        aeson
-  -- hs-source-dirs:
+  hs-source-dirs:      src
   default-language:    Haskell2010
