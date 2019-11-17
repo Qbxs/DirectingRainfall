@@ -6,7 +6,6 @@
         function draw(){
           var c = document.getElementById("canvas");
           var ctx = c.getContext("2d");
-          const mult = 10; //multiplier for scaling, TODO: make this automated
           ctx.strokeStyle = "white";
           ctx.lineWidth = 2;
           function drawLine(x1,y1,x2,y2){
@@ -15,11 +14,13 @@
             ctx.lineTo(x2, y2);
             ctx.stroke(); // Draw it
           }
-          var inp = [[32,50,12,60],
+          var inp = [[32,50,12,60], // Sample input (=input1.hs)
                     [30,60,8,70],
                     [25,70,0,80],
                     [15,30,28,40],
                     [5,20,14,25]];
+          var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
+          var mult = Math.floor(c.height / m);
           inp = inp.map(x => x.map(y => mult*y));
           for(x in inp){ // Reverse y-coordinates
             inp[x][1]=c.height-inp[x][1];
@@ -30,7 +31,7 @@
           }
           ctx.lineWidth = 5;
           ctx.strokeStyle = "green";
-          drawLine(mult*10,c.height-5,mult*20,c.height-5);
+          drawLine(mult*10,c.height-mult,mult*20,c.height-mult); //Range
         }
       </script>
       <style type="text/css">
@@ -61,7 +62,7 @@
     </head>
     <body onload="draw()">
       <h1>Tarps</h1>
-      <canvas id="canvas" width="860" height="860">
+      <canvas id="canvas" width="900" height="900">
         Input Tarps
       </canvas>
     </body>
