@@ -1,5 +1,5 @@
 html, body {
-  font-family: helvetica neue, helvetica, liberation sans,;
+  font-family: helvetica neue, helvetica, liberation sans;
   color: white;
   font-size: 14px;
   height: 100%;
@@ -20,4 +20,3 @@ h1 {
 p {
   padding-left: 22px;
 }
-canvas { border: 1px solid white; }

@@ -44,6 +44,17 @@
   (major1) == 4 && (major2) == 13 && (minor) <= 0)
 #endif /* MIN_VERSION_base */
 
+/* package directory-1.3.3.2 */
+#ifndef VERSION_directory
+#define VERSION_directory "1.3.3.2"
+#endif /* VERSION_directory */
+#ifndef MIN_VERSION_directory
+#define MIN_VERSION_directory(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  3 || \
+  (major1) == 1 && (major2) == 3 && (minor) <= 3)
+#endif /* MIN_VERSION_directory */
+
 /* package process-1.6.5.1 */
 #ifndef VERSION_process
 #define VERSION_process "1.6.5.1"

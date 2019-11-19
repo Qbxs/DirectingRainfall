@@ -2,6 +2,7 @@
 <html>
   <head>
       <title>Input Tarps</title>
+      <script type="text/javascript" src="input.json"></script>
       <script type="text/javascript">
         function draw(){
           var c = document.getElementById("canvas");
@@ -14,11 +15,8 @@
             ctx.lineTo(x2, y2);
             ctx.stroke(); // Draw it
           }
-          var inp = [[32,50,12,60], // Sample input (=input1.hs)
-                    [30,60,8,70],
-                    [25,70,0,80],
-                    [15,30,28,40],
-                    [5,20,14,25]];
+          
+          var inp = input.tarps;
           var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
           var mult = Math.floor(c.height / m);
           inp = inp.map(x => x.map(y => mult*y));
@@ -31,7 +29,7 @@
           }
           ctx.lineWidth = 5;
           ctx.strokeStyle = "green";
-          drawLine(mult*10,c.height-mult,mult*20,c.height-mult); //Range
+          drawLine(mult*input.a,c.height-mult,mult*input.b,c.height-mult); //Range
         }
       </script>
       <link href="style.css" rel="stylesheet">
