@@ -24,22 +24,28 @@ parse []                 = getContents
 parse fs                 = concat `fmap` mapM readFile fs
 
 usage, version :: IO()
-usage   = putStrLn "Usage: drf [-vhi] [file ..]"
-version = putStrLn "Haskell drf 0.1 2019"
+usage   = do
+  putStrLn "Solves for given input file the minimum amount of holes to be put in the tarps."
+  putStrLn "Usage:"
+  putStrLn "    - run cabal ..            Calculate an optimal solution"
+  putStrLn "    - run cabal -- -i ..      Show input tarps in browser"
+  putStrLn "    - run cabal -- -s ..      Show simplified tarps in browser"
+  putStrLn "    - run cabal -- -w ..      Show weighted tarps in browser"
+version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
 
 input,simplify :: String -> IO String
 input fs = do
   inp <- return fs
   (writeInput . inJ . inputParser . lexer) inp
+  putStrLn "Opening inputCanvas.html"
   system "open js/inputCanvas.html"
-  putStrLn "Succesfully opened inputCanvas.html"
   exit
 
 simplify fs = do
   inp <- return fs
   (writeSimple . siJ . inputParser . lexer) inp
+  putStrLn "Opening simpleCanvas.html"
   system "open js/simpleCanvas.html"
-  putStrLn "Succesfully opened simpleCanvas.html"
   exit
 
 exit, die :: IO String
