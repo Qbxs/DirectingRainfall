@@ -57,8 +57,8 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
                                 else (fst $ maxList xs,x:(snd $ maxList xs))
 
 -- lowest first
-sortInput :: Input -> [Tarp]
-sortInput (Input _ _ ts) = reverse $ maxSort upper ts
+sortInput :: Input -> Input
+sortInput (Input r n ts) = Input r n (reverse $ maxSort upper ts)
 
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
@@ -71,15 +71,29 @@ data Orientation = L | R
 simplify :: Tarp -> SimpleTarp
 simplify (T (x1,_) (x2,_)) = S (min x1 x2, max x1 x2) $ if x1 < x2 then L else R
 
--- cost can be an integer or nothing (=unreachable)
-type Cost = Maybe Int
 
 -- new type for tarps, split into intervals with cost to reach
 type WeightedTarp = (SimpleTarp,[(Int,Cost)])
+type Cost = Int
+
 
 weigh :: Range -> [SimpleTarp] -> [WeightedTarp]
-weigh _     []                 = []
-weigh (a,b) ((S (x1,x2) o):xs) = []
+weigh _  []                 = []
+weigh rs ((S (x1,x2) o):xs) = []
+
+-- split into all relevant intervals
+split :: Range -> [SimpleTarp] -> [(SimpleTarp,[Int])]
+split _     []     = []
+split (a,b) [t]    = [(t,[a,b])]
+split r     (t:w@((S (x,y) _):ts)) = (t,(++) [x,y] $ snd $ head s):s
+         where s = split r w
+
+-- remove duplicates and sort intervals
+clean :: [(SimpleTarp,[Int])] -> [(SimpleTarp,[Int])]
+clean = map $ fmap $ map head . group . sort
+
+-- just for testing
+test (Input r _ ts) = reverse $ clean $ split r (reverse $ map simplify ts)
 
 
 
@@ -89,10 +103,3 @@ weigh (a,b) ((S (x1,x2) o):xs) = []
 --        -> First Element of topsorted tarps (ignore everything before)
 --        - Add tarps in a graph together with minimal cost to reach
 --        - when finished add [a,b] interval as final node + connect accordingly
-
-
--- main :: IO()
--- main = do
---   i <- readFile "inputFiles/input3.hs"
---   (print . inputParser . lexer) i
---   (print . (map simplify) . sortInput . inputParser . lexer) i

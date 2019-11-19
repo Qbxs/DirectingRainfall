@@ -4,24 +4,26 @@ import Exports
 import Data.Aeson
 import GHC.Generics
 import System.Environment
-import System.Exit
+import System.Exit hiding (die)
 import System.Process
 import System.Directory
 
 main :: IO()
-main = getArgs >>= parse >>= (print . sortInput . inputParser . lexer)
+main = getArgs >>= parse >>= (print . test . sortInput . inputParser . lexer)
 
 parse :: [String] -> IO String
-parse ["-h"]             = usage   >> exit
-parse ["--help"]         = usage   >> exit
-parse ["-v"]             = version >> exit
-parse ["--version"]      = version >> exit
-parse ("-i":fs)          = (parse fs) >>= input
-parse ("--input":fs)     = (parse fs) >>= input
-parse ("-s":fs)          = (parse fs) >>= simplify
-parse ("--simplify":fs)  = (parse fs) >>= simplify
-parse []                 = getContents
-parse fs                 = concat `fmap` mapM readFile fs
+parse ["-h"]            = usage      >>  exit
+parse ["--help"]        = usage      >>  exit
+parse ["-v"]            = version    >>  exit
+parse ["--version"]     = version    >>  exit
+parse ("-i":fs)         = (parse fs) >>= input
+parse ("--input":fs)    = (parse fs) >>= input
+parse ("-s":fs)         = (parse fs) >>= simplify
+parse ("--simplify":fs) = (parse fs) >>= simplify
+parse ("-w":fs)         = die --placeholder
+parse ("--weigh":fs)    = die
+parse []                = getContents
+parse fs                = concat `fmap` mapM readFile fs
 
 usage, version :: IO()
 usage   = do
