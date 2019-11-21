@@ -1,6 +1,7 @@
 module Tarps where
 
 import Data.List
+import Control.Applicative
 import InputParser (Input(..), Range, Point, Tarp(..))
 
 -- Check whether two ranges overlap and return overlapping range
@@ -69,37 +70,41 @@ data Orientation = L | R
   deriving (Show,Eq)
 
 simplify :: Tarp -> SimpleTarp
-simplify (T (x1,_) (x2,_)) = S (min x1 x2, max x1 x2) $ if x1 < x2 then L else R
+simplify t@(T (x1,_) (x2,_)) = S (tarpRange t) $ if x1 < x2 then L else R
 
 
 -- new type for tarps, split into intervals with cost to reach
-type WeightedTarp = (SimpleTarp,[(Int,Cost)])
+type WeightedTarp = [(SimpleTarp,[(Int,Cost)])]
 type Cost = Int
-
-
-weigh :: Range -> [SimpleTarp] -> [WeightedTarp]
-weigh _  []                 = []
-weigh rs ((S (x1,x2) o):xs) = []
 
 -- split into all relevant intervals
 split :: Range -> [SimpleTarp] -> [(SimpleTarp,[Int])]
-split _     []     = []
-split (a,b) [t]    = [(t,[a,b])]
-split r     (t:w@((S (x,y) _):ts)) = (t,(++) [x,y] $ snd $ head s):s
-         where s = split r w
+split _     []                     = []
+split (a,b) [t]                    = [(t,[a,b])]
+split r     (t:w@((S (x,y) _):ts)) = let s = split r w in
+                                     (t,(++) [x,y] $ snd $ head s):s
 
 -- remove duplicates and sort intervals
-clean :: [(SimpleTarp,[Int])] -> [(SimpleTarp,[Int])]
+clean :: [(a,[Int])] -> [(a,[Int])]
 clean = map $ fmap $ map head . group . sort
 
+sortOut :: (SimpleTarp,[Int]) -> (SimpleTarp,[Int])
+sortOut ((S (x1,x2) o),[])   = ((S (x1,x2) o),[])
+sortOut ((S (x1,x2) o),r:rs)
+                 | r < x1    = sortOut (S (x1,x2) o,rs)
+                 | r > x2    = (S (x1,x2) o,[])
+                 | otherwise = (\(x,ys) -> (x,r:ys)) $ sortOut (S (x1,x2) o,rs)
+
+weigh :: [(SimpleTarp,[Int])] -> [(SimpleTarp,[Int])]
+weigh  []                     = []
+weigh ((s,[]):xs)             = (s,[]):weigh xs
+weigh ((S (x1,x2) o,r:rs):xs) | x1 > r    = weigh $ (S (x1,x2) o,rs):xs
+                              | r  > x2   = (S (x1,x2) o,rs):(weigh xs)
+                              | otherwise = (S (x1,x2) o,r:rs):(weigh xs)
+                                            --minimum of: o above-tarp+1
+                                            --            o end of above-tarp?
+                                            --            o min of smaller rs if o==L
+                                            --            o min of bigger rs if o==R
+
 -- just for testing
-test (Input r _ ts) = reverse $ clean $ split r (reverse $ map simplify ts)
-
-
-
--- TODO: implement a topsort to find out the order of reachable tarps (x)
--- Steps: - Look for highest Tarp (= tarp with highest upper point) which is
---          also in our [a,b] interval
---        -> First Element of topsorted tarps (ignore everything before)
---        - Add tarps in a graph together with minimal cost to reach
---        - when finished add [a,b] interval as final node + connect accordingly
+test (Input r _ ts) = reverse $ map sortOut $ clean $ split r $ map simplify ts

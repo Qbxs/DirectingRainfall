@@ -29,10 +29,10 @@ usage, version :: IO()
 usage   = do
   putStrLn "Solves for given input file the minimum amount of holes to be put in the tarps."
   putStrLn "Usage:"
-  putStrLn "    - run cabal ..            Calculate an optimal solution"
-  putStrLn "    - run cabal -- -i ..      Show input tarps in browser"
-  putStrLn "    - run cabal -- -s ..      Show simplified tarps in browser"
-  putStrLn "    - run cabal -- -w ..      Show weighted tarps in browser"
+  putStrLn "    - cabal run ..            Calculate an optimal solution"
+  putStrLn "    - cabal run -- -i ..      Show input tarps in browser"
+  putStrLn "    - cabal run -- -s ..      Show simplified tarps in browser"
+  putStrLn "    - cabal run -- -w ..      Show weighted tarps in browser"
 version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
 
 input,simplify :: String -> IO String
