@@ -20,7 +20,7 @@ inJ :: Input -> JInput
 inJ (Input (a,b) _ ts) = JInput a b (map (\(T (x1,y1) (x2,y2)) -> [x1,y1,x2,y2]) ts)
 
 writeInput :: JInput -> IO ()
-writeInput s = do -- very inefficient
+writeInput s = do -- very inefficient: TODO do this with Data.ByteString.Conversion
   encodeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json" s
   i <- readFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
   writeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/input.json" ("input="++i)
@@ -38,7 +38,7 @@ siJ :: Input -> JSimple
 siJ (Input (a,b) _ ts) = JSimple a b (map (\(S (x,y) o) -> [x,y,if o == L then 0 else 1]) (map simplify (reverse (maxSort upper ts))))
 
 writeSimple :: JSimple -> IO ()
-writeSimple s = do -- very inefficient
+writeSimple s = do -- very inefficient: TODO do this with Data.ByteString.Conversion
   encodeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json" s
   i <- readFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
   writeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/simple.json" ("simple="++i)

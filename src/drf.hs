@@ -9,7 +9,7 @@ import System.Process
 import System.Directory
 
 main :: IO()
-main = getArgs >>= parse >>= (print . test . sortInput . inputParser . lexer)
+main = getArgs >>= parse >>= (print . Tarps.test . sortInput . inputParser . lexer)
 
 parse :: [String] -> IO String
 parse ["-h"]            = usage      >>  exit
