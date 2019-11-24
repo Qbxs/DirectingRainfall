@@ -35,7 +35,7 @@ usage   = do
   putStrLn "    - cabal run -- -w ..      Show weighted tarps in browser"
 version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
 
-input,simplify :: String -> IO String
+input,simplify,weighing :: String -> IO String
 input fs = do
   inp <- return fs
   (writeInput . inJ . inputParser . lexer) inp

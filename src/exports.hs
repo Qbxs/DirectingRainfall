@@ -63,9 +63,9 @@ data JWeighted = JWeighted {
 instance ToJSON JWeighted
 
 weighted :: Input -> WeightedTarps
-weighted (Input (a,b) _ ts) = reverse $ weigh (a,b) $ map turn $ map (toRanges <$>)
+weighted (Input (a,b) _ ts) = weigh (a,b) $ map turn $ map (toRanges <$>)
                               $ map sortOut $ map (\x -> (x,ivs)) simp
-                          where simp = map simplify ts
+                          where simp = map simplify $ reverse $ maxSort upper ts
                                 ivs = map head . group . sort $ intervals [a,b] simp
 
 fromMaybe :: Cost -> Int

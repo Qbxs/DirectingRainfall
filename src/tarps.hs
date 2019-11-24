@@ -64,9 +64,6 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
                                 then (x,(fst $ maxList xs):(snd $ maxList xs))
                                 else (fst $ maxList xs,x:(snd $ maxList xs))
 
--- lowest first
-sortInput :: Input -> Input
-sortInput (Input r n ts) = Input r n (reverse $ maxSort upper ts)
 
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
@@ -192,6 +189,6 @@ unJust (Just x) = show x
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> String
 solution (Input (a,b) _ ts) = (unJust . thd3 . head) vs
-                          where simp = (S (a,b) R):(map simplify ts)
+                          where simp = (S (a,b) R):(map simplify $ reverse $ maxSort upper ts)
                                 ivs = map head . group . sort $ intervals [a,b] simp
                                 (s,vs) = head $ weigh (a,b) $ map turn $ map (toRanges <$>) $ map sortOut $ map (\x -> (x,ivs)) simp
