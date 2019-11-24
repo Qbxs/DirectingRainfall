@@ -11,4 +11,5 @@ See the description here https://db.inf.uni-tuebingen.de/staticfiles/teaching/ws
 - `cabal run [file]` Solves minimum amount of holes to be put in tarps
 - `cabal run -- -i [file]` Draw the input tarps
 - `cabal run -- -s [file]` Draw simplified input tarps
-- `cabal run -- -h`/`run cabal -- -v` Help/Version 
+- `cabal run -- -w [file]` Draw weighted simplified tarps
+- `cabal run -- -h`/`run cabal -- -v` Help/Version
