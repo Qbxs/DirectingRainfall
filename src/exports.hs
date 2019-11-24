@@ -28,10 +28,10 @@ writeInput s = do -- very inefficient: TODO do this with Data.ByteString.Convers
 
 
 data JSimple = JSimple {
-    sa       :: Int,
-    sb       :: Int,
-    starps   :: [[Int]]
-} deriving (Show,Generic)
+      sa       :: Int,
+      sb       :: Int,
+      starps   :: [[Int]]
+      } deriving (Show,Generic)
 instance ToJSON JSimple
 
 siJ :: Input -> JSimple

@@ -24,13 +24,14 @@
           var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
           var mult = Math.floor(c.height / m);
           function drawArrowHead(x,y,o){
+            var size = Math.min(mult,Math.floor(c.height/40));
             if(o == 0){ //points to left
-              drawLine(x,y,x+mult,y+mult);
-              drawLine(x,y,x+mult,y-mult);
+              drawLine(x,y,x+size,y+size);
+              drawLine(x,y,x+size,y-size);
             }
             else{
-              drawLine(x,y,x-mult,y+mult);
-              drawLine(x,y,x-mult,y-mult);
+              drawLine(x,y,x-size,y+size);
+              drawLine(x,y,x-size,y-size);
             }
           }
           inp = inp.map(x => x.map(y => mult*y));

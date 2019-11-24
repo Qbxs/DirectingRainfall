@@ -9,7 +9,7 @@ import System.Process
 import System.Directory
 
 main :: IO()
-main = getArgs >>= parse >>= (print . Tarps.test . sortInput . inputParser . lexer)
+main = getArgs >>= parse >>= (print . Tarps.solution . sortInput . inputParser . lexer)
 
 parse :: [String] -> IO String
 parse ["-h"]            = usage      >>  exit
@@ -20,8 +20,8 @@ parse ("-i":fs)         = (parse fs) >>= input
 parse ("--input":fs)    = (parse fs) >>= input
 parse ("-s":fs)         = (parse fs) >>= simplify
 parse ("--simplify":fs) = (parse fs) >>= simplify
-parse ("-w":fs)         = die --placeholder
-parse ("--weigh":fs)    = die
+parse ("-w":fs)         = (parse fs) >>= weighing
+parse ("--weigh":fs)    = (parse fs) >>= weighing
 parse []                = getContents
 parse fs                = concat `fmap` mapM readFile fs
 
@@ -48,6 +48,11 @@ simplify fs = do
   (writeSimple . siJ . inputParser . lexer) inp
   putStrLn "Opening simpleCanvas.html"
   system "open js/simpleCanvas.html"
+  exit
+
+weighing fs = do
+  inp <- return fs
+  (putStrLn . show . weighted . inputParser . lexer) inp
   exit
 
 exit, die :: IO String
