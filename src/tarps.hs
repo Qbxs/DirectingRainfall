@@ -183,13 +183,6 @@ weigh v [s]         = [flow <$> initialise v s]
 weigh v ((s,rs):ts) = (s,flow $ map (\r -> costsAbove s r w) rs):w
                         where w = weigh v ts
 
--- just for testing
-test,weighted :: Input -> WeightedTarps
-test = weighted
-
-weighted (Input (a,b) _ ts) = reverse $ weigh (a,b) $ map turn $ map (toRanges <$>) $ map sortOut $ map (\x -> (x,ivs)) simp
-                          where simp = map simplify ts
-                                ivs = map head . group . sort $ intervals [a,b] simp
 
 -- we don't want "Just" in our output
 unJust :: (Show a) => Maybe a -> String

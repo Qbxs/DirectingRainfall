@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Weighted Tarps</title>
+      <script type="text/javascript" src="weighted.json"></script>
+      <script type="text/javascript">
+        function draw(){
+          var c = document.getElementById("canvas");
+          var ctx = c.getContext("2d");
+          ctx.strokeStyle = "white";
+          ctx.lineWidth = 2;
+          ctx.font = "16px Helvetica";
+          ctx.fillStyle = "white";
+          ctx.textAlign = "center";
+          function drawLine(x1,y1,x2,y2){
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke(); // Draw it
+          }
+          var inp = weighted.wtarps;
+          const placeholder = (c.height / (inp.length+1)) - ctx.lineWidth; //space between tarps
+          var space = placeholder;
+          var m = Math.max.apply(Math,inp.map(x => Math.max(x.x1,x.x2)));
+          var mult = Math.floor(c.height / m);
+          function drawArrowHead(x,y,o){
+            var size = Math.min(mult,Math.floor(c.height/40));
+            if(o == 0){ //points to left
+              drawLine(x,y,x+size,y+size);
+            }
+            else{
+              drawLine(x,y,x-size,y+size);
+            }
+          }
+          //scaling:
+          for(a in inp){
+            inp[a].x1 *= mult;
+            inp[a].x2 *= mult;
+            var costs = inp[a].costs;
+            for(i in costs){
+              costs[i][0] *= mult;
+              costs[i][1] *= mult;
+            }
+          }
+
+          //drawing
+          for(a in inp){
+            var costs = inp[a].costs;
+            var y = c.height - space;
+            for(i in costs){
+              drawLine(costs[i][0],y,costs[i][1],y);
+              drawLine(costs[i][0],y,costs[i][0],y-8);
+              drawLine(costs[i][1],y,costs[i][1],y-8);
+              if(costs[i][2] >= 0){
+                var pos = Math.floor((costs[i][0]+costs[i][1])/2)
+                ctx.fillText(costs[i][2],pos,y-10);
+              }
+            }
+            if(inp[a].o == 0){
+              drawArrowHead(inp[a].x1,y,0)
+            }
+            else{
+              drawArrowHead(inp[a].x2,y,1)
+            }
+            space += placeholder;
+          }
+          ctx.lineWidth = 5;
+          ctx.strokeStyle = "green";
+          drawLine(mult*weighted.wa,c.height-mult,mult*weighted.wb,c.height-mult); //Range
+        }
+      </script>
+      <link href="style.css" rel="stylesheet">
+    </head>
+    <body onload="draw()">
+      <h1>Weighted Tarps</h1>
+      <canvas id="canvas" width="900" height="900">
+        Weighted Tarps
+      </canvas>
+    </body>
+</html>

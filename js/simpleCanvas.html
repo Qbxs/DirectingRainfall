@@ -15,11 +15,8 @@
             ctx.lineTo(x2, y2);
             ctx.stroke(); // Draw it
           }
-
-          //simple = { "sa" : 10, "sb" : 20, "starps" : [[5,10,0],[15,25,1],[12,18,0]]}; //ex
-
           var inp = simple.starps;
-          const placeholder = (c.height / inp.length) -2; //space between tarps
+          const placeholder = (c.height / inp.length) - ctx.lineWidth; //space between tarps
           var space = placeholder;
           var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
           var mult = Math.floor(c.height / m);
@@ -35,7 +32,7 @@
             }
           }
           inp = inp.map(x => x.map(y => mult*y));
-          for(a in inp){ //TODO: draw arrowhead
+          for(a in inp){
             if(inp[a][2] == 0){
               drawArrowHead(inp[a][0],c.height-space,0);
               drawLine(inp[a][0],c.height-space,inp[a][1],c.height-space);

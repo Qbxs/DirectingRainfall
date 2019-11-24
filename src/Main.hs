@@ -52,7 +52,9 @@ simplify fs = do
 
 weighing fs = do
   inp <- return fs
-  (putStrLn . show . weighted . inputParser . lexer) inp
+  (writeWeighted . weJ . inputParser . lexer) inp
+  putStrLn "Opening weightedCanvas.html"
+  system "open js/weightedCanvas.html"
   exit
 
 exit, die :: IO String
