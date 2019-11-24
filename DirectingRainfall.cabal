@@ -19,7 +19,7 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md, readme.md
 
 executable DirectingRainfall
-  main-is:             drf.hs
+  main-is:             Main.hs
   other-modules:       InputParser, Tarps, Exports
   -- other-extensions:
   build-depends:       base >=4.3 && <5,
