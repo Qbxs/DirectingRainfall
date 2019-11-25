@@ -9,7 +9,7 @@
           var ctx = c.getContext("2d");
           ctx.strokeStyle = "white";
           ctx.lineWidth = 2;
-          ctx.font = "16px Helvetica";
+          ctx.font = "14px Helvetica";
           ctx.fillStyle = "white";
           ctx.textAlign = "center";
           function drawLine(x1,y1,x2,y2){
@@ -53,7 +53,7 @@
               drawLine(costs[i][1],y,costs[i][1],y-8);
               if(costs[i][2] >= 0){
                 var pos = Math.floor((costs[i][0]+costs[i][1])/2)
-                ctx.fillText(costs[i][2],pos,y-10);
+                ctx.fillText(costs[i][2],pos,y-4);
               }
             }
             if(inp[a].o == 0){

@@ -34,19 +34,19 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   if c2 >= b2 then False else
                -- here: all cases for which t1 overlaps t2 partially
                -- consider all combinations of {a,b} x {c,d} => 8
-                     x == a1 && y == c1 && a2 >= c2
-                  || x == a1 && y == d1 && b2 >= d2
-                  || x == b1 && y == c1 && b2 >= c2
-                  || x == b1 && y == d1 && b2 >= d2
-                  || x == c1 && y == a1 && a2 >= c2
-                  || x == c1 && y == b1 && b2 >= c2
-                  || x == d1 && y == a1 && a2 >= c2
-                  || x == d1 && y == b1 && b2 >= d2
+                     x == a1 && y == c1 && a2 > c2
+                  || x == a1 && y == d1 && b2 > d2
+                  || x == b1 && y == c1 && b2 > c2
+                  || x == b1 && y == d1 && b2 > d2
+                  || x == c1 && y == a1 && a2 > c2
+                  || x == c1 && y == b1 && b2 > c2
+                  || x == d1 && y == a1 && a2 > c2
+                  || x == d1 && y == b1 && b2 > d2
                -- here: all cases of total overlap where t1 is higher
-                  || x == a1 && y == b1 && a2 >= c2
-                  || x == b1 && y == a1 && a2 >= c2
-                  || x == c1 && y == d1 && b2 >= d2
-                  || x == d1 && y == c1 && b2 >= d2
+                  || x == a1 && y == b1 && a2 > c2
+                  || x == b1 && y == a1 && a2 > c2
+                  || x == c1 && y == d1 && b2 > d2
+                  || x == d1 && y == c1 && b2 > d2
 
 
 quicksort, maxSort :: (a -> a -> Bool) -> [a] -> [a]
@@ -70,7 +70,7 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
 -- if x1<x2 then tarp points to the left else to the right
 data SimpleTarp = S Range Orientation
   deriving (Show, Eq)
-data Orientation = L | R
+data Orientation = L | R -- TODO: add neutral as vineyard
   deriving (Show,Eq)
 
 simplify :: Tarp -> SimpleTarp
@@ -124,30 +124,27 @@ type Cost          = Maybe Int
 incr :: Num a => a -> Maybe a
 incr x = Just $ x + 1
 
--- disclaimer: SimpleTarp is just a range of a tarp
-costAbove :: SimpleTarp -> WeightedTarps -> WeightedRange
-costAbove (S (a,b) _)   []          = (a,b,Nothing)
-costAbove s             ((_,[]):ts) = costAbove s ts
-costAbove s@(S (a,b) R) ((S (x1,x2) R,(r1,r2,c):rs):ts)
-              | r1 == a && r1 == x2 = (a,b,c)
-              | r2 == a             = (a,b,c >>= incr)
-              | otherwise           = costAbove s ((S (x1,x2) R,rs):ts)
-costAbove s@(S (a,b) L) ((S (x1,x2) R,(r1,r2,c):rs):ts)
-              | r1 == b && r1 == x2 = (a,b,c)
-              | r1 == b             = (a,b,c >>= incr)
-              | otherwise           = costAbove s ((S (x1,x2) R,rs):ts)
-costAbove s@(S (a,b) L) ((S (x1,x2) L,(r1,r2,c):rs):ts)
+-- calculate costs of an interval of a tarp based on costs of tarps above
+costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
+costAbove _ (a,b)       []          = (a,b,Nothing)
+costAbove s r           ((_,[]):ts) = costAbove s r ts
+costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts)
+              | r2 == b && r2 == x2 = (a,b,c)
+              | (b,a) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
+costAbove s@(S _ L) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts)
+              | r2 == b && r2 == x2 = (a,b,c)
+              | (a,b) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
+costAbove s@(S _ L) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts)
               | r1 == b && r1 == x1 = (a,b,c)
-              | r1 == b             = (a,b,c >>= incr)
-              | otherwise           = costAbove s ((S (x1,x2) L,rs):ts)
-costAbove s@(S (a,b) R) ((S (x1,x2) L,(r1,r2,c):rs):ts)
-              | r1 == a && r1 == x1 = (a,b,c)
-              | r1 == a             = (a,b,c >>= incr)
-              | otherwise           = costAbove s ((S (x1,x2) L,rs):ts)
+              | (a,b) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
+costAbove s@(S _ R) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts)
+              | r1 == b && r1 == x1 = (a,b,c)
+              | (b,a) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
 
--- caller-function that is easier to use
-costsAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
-costsAbove (S (a,b) o) (r1,r2) ts = costAbove (S (r1,r2) o) ts
 
 minCost :: Cost -> Cost -> Cost
 minCost (Just c) (Just d) = Just $ min c d
@@ -163,7 +160,7 @@ flow ((r1,r2,c):ws) = (r1,r2,minCost c (thd3 $ head flowed)):flowed
                     where flowed = flow ws
 
 
--- calculate costs for upmost tarp (condition: has to be reachable)
+-- calculate costs for upmost tarp (condition: has to be reachable) TODO unreachable cases
 initialise :: Range -> (SimpleTarp,[Range]) -> (SimpleTarp,[WeightedRange])
 initialise _     (s,[]) = (s,[])
 initialise (a,b) (S t R,(r1,r2):rs)
@@ -177,7 +174,7 @@ initialise (a,b) (S t L,(r1,r2):rs)
 weigh :: Range -> [(SimpleTarp,[Range])] -> WeightedTarps
 weigh _ []          = []
 weigh v [s]         = [flow <$> initialise v s]
-weigh v ((s,rs):ts) = (s,flow $ map (\r -> costsAbove s r w) rs):w
+weigh v ((s,rs):ts) = (s,flow $ map (\r -> costAbove s r w) rs):w
                         where w = weigh v ts
 
 
