@@ -7,10 +7,7 @@
         function draw(){
           var c = document.getElementById("canvas");
           var ctx = c.getContext("2d");
-          ctx.strokeStyle = "white";
-          ctx.lineWidth = 2;
           ctx.font = "14px Helvetica";
-          ctx.fillStyle = "white";
           ctx.textAlign = "center";
           function drawLine(x1,y1,x2,y2){
             ctx.beginPath();
@@ -19,6 +16,7 @@
             ctx.stroke(); // Draw it
           }
           var inp = weighted.wtarps;
+          inp.pop();
           const placeholder = Math.floor((c.height / (inp.length+0.1)) - ctx.lineWidth); //space between tarps
           var space = placeholder;
           var m = Math.max.apply(Math,inp.map(x => Math.max(x.x1,x.x2)));
@@ -43,6 +41,10 @@
             }
           }
 
+          ctx.lineWidth = 5;
+          ctx.strokeStyle = "green";
+          ctx.fillStyle = "green";
+
           //drawing
           for(a in inp){
             var costs = inp[a].costs;
@@ -56,17 +58,17 @@
                 ctx.fillText(costs[i][2],pos,y-4);
               }
             }
-            if(inp[a].o == 0){
+            if(inp[a].o < 0){
               drawArrowHead(inp[a].x1,y,0)
             }
-            else{
+            else if(inp[a].o > 0){
               drawArrowHead(inp[a].x2,y,1)
             }
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
             space += placeholder;
           }
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = "green";
-          drawLine(mult*weighted.wa,c.height-mult,mult*weighted.wb,c.height-mult); //Range
         }
       </script>
       <link href="style.css" rel="stylesheet">

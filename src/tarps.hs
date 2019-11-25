@@ -70,7 +70,7 @@ maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
 -- if x1<x2 then tarp points to the left else to the right
 data SimpleTarp = S Range Orientation
   deriving (Show, Eq)
-data Orientation = L | R -- TODO: add neutral as vineyard
+data Orientation = L | R | N --left | right | neutral(vineyard)
   deriving (Show,Eq)
 
 simplify :: Tarp -> SimpleTarp
@@ -87,7 +87,7 @@ split r     (t:w@((S (x,y) _):ts)) = let s = split r w in
                                      (t,(++) [x,y] $ snd $ head s):s
 
 -- remove duplicates and sort intervals
-clean :: [(a,[Int])] -> [(a,[Int])]
+clean :: (Ord b) => [(a,[b])] -> [(a,[b])]
 clean = map $ fmap $ map head . group . sort
 
 
@@ -128,22 +128,38 @@ incr x = Just $ x + 1
 costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
 costAbove _ (a,b)       []          = (a,b,Nothing)
 costAbove s r           ((_,[]):ts) = costAbove s r ts
-costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts)
+costAbove s         (a,b) ((t,(_,_,Nothing):rs):ts) --keep looking
+                                    = costAbove s (a,b) ((t,rs):ts)
+costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on R
               | r2 == b && r2 == x2 = (a,b,c)
               | (b,a) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
-costAbove s@(S _ L) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts)
+costAbove s@(S _ L) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on L
               | r2 == b && r2 == x2 = (a,b,c)
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
-costAbove s@(S _ L) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts)
+costAbove s@(S _ L) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on L
               | r1 == b && r1 == x1 = (a,b,c)
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
-costAbove s@(S _ R) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts)
+costAbove s@(S _ R) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on R
               | r1 == b && r1 == x1 = (a,b,c)
               | (b,a) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
+costAbove s@(S _ N) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on N
+              | r1 == a && r1 == x1 = (a,b,c)
+              | r1 == b && r1 == x1 = (a,b,c)
+              | (a,b) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
+costAbove s@(S _ N) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on N
+              | r2 == b && r2 == x2 = (a,b,c)
+              | r1 == b && r1 == x2 = (a,b,c)
+              | (a,b) == (r1,r2)    = (a,b,c >>= incr)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
+costAbove s@(S _ _) (a,b) ((S (x1,x2) N,(r1,r2,c):rs):ts) -- N on any
+              | (a,b) == (r1,r2)    = (a,b,c)
+              | (a,b) == (r2,r1)    = (a,b,c)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) N,rs):ts)
 
 
 minCost :: Cost -> Cost -> Cost
@@ -160,32 +176,16 @@ flow ((r1,r2,c):ws) = (r1,r2,minCost c (thd3 $ head flowed)):flowed
                     where flowed = flow ws
 
 
--- calculate costs for upmost tarp (condition: has to be reachable) TODO unreachable cases
-initialise :: Range -> (SimpleTarp,[Range]) -> (SimpleTarp,[WeightedRange])
-initialise _     (s,[]) = (s,[])
-initialise (a,b) (S t R,(r1,r2):rs)
-              | r2 >= a && r1 <= b = (\(x,ys) -> (x,(r1,r2,Just 0):ys)) $ initialise (a,b) (S t R,rs)
-              | otherwise          = (\(x,ys) -> (x,(r1,r2,Nothing):ys)) $ initialise (a,b) (S t R,rs)
-initialise (a,b) (S t L,(r1,r2):rs)
-              | r1 >= a && r2 <= b = (\(x,ys) -> (x,(r1,r2,Just 0):ys)) $ initialise (a,b) (S t L,rs)
-              | otherwise          = (\(x,ys) -> (x,(r1,r2,Nothing):ys)) $ initialise (a,b) (S t L,rs)
-
-
 weigh :: Range -> [(SimpleTarp,[Range])] -> WeightedTarps
 weigh _ []          = []
-weigh v [s]         = [flow <$> initialise v s]
+weigh v [(s,rs)]     = [(s,map (\(x,y) -> (x,y,Just 0)) rs)]
 weigh v ((s,rs):ts) = (s,flow $ map (\r -> costAbove s r w) rs):w
                         where w = weigh v ts
 
 
--- we don't want "Just" in our output
-unJust :: (Show a) => Maybe a -> String
-unJust Nothing = "Nothing"
-unJust (Just x) = show x
-
 -- solve by adding ground as extra tarp and get min Cost of all ranges
-solution :: Input -> String
-solution (Input (a,b) _ ts) = (unJust . thd3 . head) vs
-                          where simp = (S (a,b) R):(map simplify $ reverse $ maxSort upper ts)
+solution :: Input -> Int
+solution (Input (a,b) _ ts) = minimum $ minimum <$> (map thd3 $ vs)
+                          where simp = ((S (a,b) N):(map simplify $ reverse $ maxSort upper ts)) ++ [S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
                                 (s,vs) = head $ weigh (a,b) $ map turn $ map (toRanges <$>) $ map sortOut $ map (\x -> (x,ivs)) simp
