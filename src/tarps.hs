@@ -120,18 +120,27 @@ type WeightedTarps = [(SimpleTarp,[WeightedRange])]
 type WeightedRange = (Int,Int,Cost)
 type Cost          = Maybe Int
 
+minCost :: Cost -> Cost -> Cost
+minCost (Just c) (Just d) = Just $ min c d
+minCost (Just c) Nothing  = Just c
+minCost Nothing  (Just d) = Just d
+minCost Nothing  Nothing  = Nothing
+
+minRange :: WeightedRange -> WeightedRange -> WeightedRange
+minRange (a,b,c) (_,_,z) = (a,b,minCost c z)
+
 
 incr :: Num a => a -> Maybe a
 incr x = Just $ x + 1
 
 -- calculate costs of an interval of a tarp based on costs of tarps above
 costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
-costAbove _ (a,b)       []          = (a,b,Nothing)
-costAbove s r           ((_,[]):ts) = costAbove s r ts
+costAbove _         (a,b) []        = (a,b,Nothing)
+costAbove s         r   ((_,[]):ts) = costAbove s r ts
 costAbove s         (a,b) ((t,(_,_,Nothing):rs):ts) --keep looking
                                     = costAbove s (a,b) ((t,rs):ts)
 costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on R
-              | r2 == b && r2 == x2 = (a,b,c)
+              | r2 == b && r2 == x2 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) R,rs):ts))
               | (b,a) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
 costAbove s@(S _ L) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on L
@@ -139,7 +148,7 @@ costAbove s@(S _ L) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on L
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
 costAbove s@(S _ L) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on L
-              | r1 == b && r1 == x1 = (a,b,c)
+              | r1 == b && r1 == x1 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) L,rs):ts))
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
 costAbove s@(S _ R) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on R
@@ -147,26 +156,19 @@ costAbove s@(S _ R) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on R
               | (b,a) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
 costAbove s@(S _ N) (a,b) ((S (x1,x2) L,(r1,r2,c):rs):ts) -- L on N
+              | r1 == b && r1 == x1 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) L,rs):ts))
               | r1 == a && r1 == x1 = (a,b,c)
-              | r1 == b && r1 == x1 = (a,b,c)
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
 costAbove s@(S _ N) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on N
+              | r2 == a && r2 == x2 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) R,rs):ts))
               | r2 == b && r2 == x2 = (a,b,c)
-              | r1 == b && r1 == x2 = (a,b,c)
               | (a,b) == (r1,r2)    = (a,b,c >>= incr)
-              | otherwise           = costAbove s (a,b) ((S (x1,x2) L,rs):ts)
+              | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
 costAbove s@(S _ _) (a,b) ((S (x1,x2) N,(r1,r2,c):rs):ts) -- N on any
               | (a,b) == (r1,r2)    = (a,b,c)
               | (a,b) == (r2,r1)    = (a,b,c)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) N,rs):ts)
-
-
-minCost :: Cost -> Cost -> Cost
-minCost (Just c) (Just d) = Just $ min c d
-minCost (Just c) Nothing  = Just c
-minCost Nothing  (Just d) = Just d
-minCost Nothing  Nothing  = Nothing
 
 
 flow :: [WeightedRange] -> [WeightedRange]

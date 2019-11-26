@@ -22,10 +22,10 @@ inJ (Input (a,b) _ ts) = JInput a b (map (\(T (x1,y1) (x2,y2)) -> [x1,y1,x2,y2])
 
 writeInput :: JInput -> IO ()
 writeInput s = do
-  encodeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json" s
-  i <- readFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
-  writeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/input.json" ("input="++i)
-  removeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
+  encodeFile "js/temp.json" s
+  i <- readFile "js/temp.json"
+  writeFile "js/input.json" ("input="++i)
+  removeFile "js/temp.json"
 
 
 data JSimple = JSimple {
@@ -42,10 +42,10 @@ siJ (Input (a,b) _ ts) = JSimple a b
 
 writeSimple :: JSimple -> IO ()
 writeSimple s = do
-  encodeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json" s
-  i <- readFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
-  writeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/simple.json" ("simple="++i)
-  removeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
+  encodeFile "js/temp.json" s
+  i <- readFile "js/temp.json"
+  writeFile "js/simple.json" ("simple="++i)
+  removeFile "js/temp.json"
 
 data JTarp = JTarp {
       x1    :: Int,
@@ -80,7 +80,7 @@ weJ i@(Input (a,b) _ ts) = JWeighted a b $
 
 writeWeighted :: JWeighted -> IO ()
 writeWeighted s = do
-  encodeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json" s
-  i <- readFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
-  writeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/weighted.json" ("weighted="++i)
-  removeFile "/Users/pascalengel/Documents/acmContest/DirectingRainfall/js/temp.json"
+  encodeFile "js/temp.json" s
+  i <- readFile "js/temp.json"
+  writeFile "js/weighted.json" ("weighted="++i)
+  removeFile "js/temp.json"
