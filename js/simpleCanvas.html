@@ -1,59 +1,62 @@
 <!DOCTYPE html>
 <html>
-  <head>
-      <title>Simplified Tarps</title>
-      <script type="text/javascript" src="simple.json"></script>
-      <script type="text/javascript">
-        function draw(){
-          var c = document.getElementById("canvas");
-          var ctx = c.getContext("2d");
-          ctx.strokeStyle = "white";
-          ctx.lineWidth = 2;
-          function drawLine(x1,y1,x2,y2){
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke(); // Draw it
-          }
-          var inp = simple.starps;
-          const placeholder = Math.floor((c.height / (inp.length+0.1)) - ctx.lineWidth); //space between tarps
-          var space = placeholder;
-          var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
-          var mult = Math.floor(c.height / m);
-          function drawArrowHead(x,y,o){
-            var size = Math.min(mult,Math.floor(c.height/40));
-            if(o == 0){ //points to left
-              drawLine(x,y,x+size,y+size);
-              drawLine(x,y,x+size,y-size);
-            }
-            else{
-              drawLine(x,y,x-size,y+size);
-              drawLine(x,y,x-size,y-size);
-            }
-          }
-          inp = inp.map(x => x.map(y => mult*y));
-          for(a in inp){
-            if(inp[a][2] == 0){
-              drawArrowHead(inp[a][0],c.height-space,0);
-              drawLine(inp[a][0],c.height-space,inp[a][1],c.height-space);
-            }
-            else{
-              drawArrowHead(inp[a][1],c.height-space,1);
-              drawLine(inp[a][0],c.height-space,inp[a][1],c.height-space);
-            }
-            space = space+placeholder;
-          }
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = "green";
-          drawLine(mult*simple.sa,c.height-mult,mult*simple.sb,c.height-mult); //Range
+
+<head>
+  <title>Simplified Tarps</title>
+  <script type="text/javascript" src="simple.json"></script>
+  <script type="text/javascript">
+    function draw() {
+      var c = document.getElementById("canvas");
+      var ctx = c.getContext("2d");
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+
+      function drawLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke(); // Draw it
+      }
+      var inp = simple.starps;
+      const placeholder = Math.floor((c.height / (inp.length + 0.1)) - ctx.lineWidth); //space between tarps
+      var space = placeholder;
+      var m = Math.max.apply(Math, inp.map(x => Math.max.apply(Math, x)));
+      var mult = Math.floor(c.height / m);
+
+      function drawArrowHead(x, y, o) {
+        var size = Math.min(mult, Math.floor(c.height / 40));
+        if (o == 0) { //points to left
+          drawLine(x, y, x + size, y + size);
+          drawLine(x, y, x + size, y - size);
+        } else {
+          drawLine(x, y, x - size, y + size);
+          drawLine(x, y, x - size, y - size);
         }
-      </script>
-      <link href="style.css" rel="stylesheet">
-    </head>
-    <body onload="draw()">
-      <h1>Simplified Tarps</h1>
-      <canvas id="canvas" width="900" height="900">
-        Input Tarps
-      </canvas>
-    </body>
+      }
+      inp = inp.map(x => x.map(y => mult * y));
+      for (a in inp) {
+        if (inp[a][2] == 0) {
+          drawArrowHead(inp[a][0], c.height - space, 0);
+          drawLine(inp[a][0], c.height - space, inp[a][1], c.height - space);
+        } else {
+          drawArrowHead(inp[a][1], c.height - space, 1);
+          drawLine(inp[a][0], c.height - space, inp[a][1], c.height - space);
+        }
+        space = space + placeholder;
+      }
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "green";
+      drawLine(mult * simple.sa, c.height - mult, mult * simple.sb, c.height - mult); //Range
+    }
+  </script>
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body onload="draw()">
+  <h1>Simplified Tarps</h1>
+  <canvas id="canvas" width="900" height="900">
+    Input Tarps
+  </canvas>
+</body>
+
 </html>

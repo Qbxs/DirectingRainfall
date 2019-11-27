@@ -1,43 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-      <title>Input Tarps</title>
-      <script type="text/javascript" src="input.json"></script>
-      <script type="text/javascript">
-        function draw(){
-          var c = document.getElementById("canvas");
-          var ctx = c.getContext("2d");
-          ctx.strokeStyle = "white";
-          ctx.lineWidth = 2;
-          function drawLine(x1,y1,x2,y2){
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke(); // Draw it
-          }
-          
-          var inp = input.tarps;
-          var m = Math.max.apply(Math,inp.map(x => Math.max.apply(Math, x)));
-          var mult = Math.floor(c.height / m);
-          inp = inp.map(x => x.map(y => mult*y));
-          for(x in inp){ // Reverse y-coordinates
-            inp[x][1]=c.height-inp[x][1];
-            inp[x][3]=c.height-inp[x][3];
-          }
-          for(a in inp){
-            drawLine(inp[a][0],inp[a][1],inp[a][2],inp[a][3]);
-          }
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = "green";
-          drawLine(mult*input.a,c.height-mult,mult*input.b,c.height-mult); //Range
-        }
-      </script>
-      <link href="style.css" rel="stylesheet">
-    </head>
-    <body onload="draw()">
-      <h1>Tarps</h1>
-      <canvas id="canvas" width="900" height="900">
-        Input Tarps
-      </canvas>
-    </body>
+
+<head>
+  <title>Input Tarps</title>
+  <script type="text/javascript" src="input.json"></script>
+  <script type="text/javascript">
+    function draw() {
+      var c = document.getElementById("canvas");
+      var ctx = c.getContext("2d");
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+
+      function drawLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke(); // Draw it
+      }
+
+      var inp = input.tarps;
+      var m = Math.max.apply(Math, inp.map(x => Math.max.apply(Math, x)));
+      var mult = Math.floor(c.height / m);
+      inp = inp.map(x => x.map(y => mult * y));
+      for (x in inp) { // Reverse y-coordinates
+        inp[x][1] = c.height - inp[x][1];
+        inp[x][3] = c.height - inp[x][3];
+      }
+      for (a in inp) {
+        drawLine(inp[a][0], inp[a][1], inp[a][2], inp[a][3]);
+      }
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "green";
+      drawLine(mult * input.a, c.height - mult, mult * input.b, c.height - mult); //Range
+    }
+  </script>
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body onload="draw()">
+  <h1>Tarps</h1>
+  <canvas id="canvas" width="900" height="900">
+    Input Tarps
+  </canvas>
+</body>
+
 </html>
