@@ -37,8 +37,8 @@ instance ToJSON JSimple
 
 siJ :: Input -> JSimple
 siJ (Input (a,b) _ ts) = JSimple a b
-                          (map (\(S (x,y) o) -> [x,y,if o == L then 0 else 1])
-                           (map simplify (reverse (maxSort upper ts))))
+                          (map ((\(S (x,y) o) -> [x,y,if o == L then 0 else 1])
+                           . simplify) (reverse $ maxSort upper ts))
 
 writeSimple :: JSimple -> IO ()
 writeSimple s = do
@@ -63,8 +63,8 @@ data JWeighted = JWeighted {
 instance ToJSON JWeighted
 
 weighted :: Input -> WeightedTarps
-weighted (Input (a,b) _ ts) = weigh (a,b) $ map turn $ map (toRanges <$>)
-                              $ map sortOut $ map (\x -> (x,ivs)) simp
+weighted (Input (a,b) _ ts) = weigh (a,b) $ map (turn . (toRanges <$>)
+                              . sortOut . (\x -> (x,ivs))) simp
                           where simp = (S (a,b) N):(map simplify $ reverse $ maxSort upper ts)++[S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
 

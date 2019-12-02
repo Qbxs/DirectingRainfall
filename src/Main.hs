@@ -12,16 +12,16 @@ main :: IO()
 main = getArgs >>= parse >>= (print . Tarps.solution . inputParser . lexer)
 
 parse :: [String] -> IO String
-parse ["-h"]            = usage      >>  exit
-parse ["--help"]        = usage      >>  exit
-parse ["-v"]            = version    >>  exit
-parse ["--version"]     = version    >>  exit
-parse ("-i":fs)         = (parse fs) >>= input
-parse ("--input":fs)    = (parse fs) >>= input
-parse ("-s":fs)         = (parse fs) >>= simplify
-parse ("--simplify":fs) = (parse fs) >>= simplify
-parse ("-w":fs)         = (parse fs) >>= weighing
-parse ("--weigh":fs)    = (parse fs) >>= weighing
+parse ["-h"]            = usage    >>  exitSuccess
+parse ["--help"]        = usage    >>  exitSuccess
+parse ["-v"]            = version  >>  exitSuccess
+parse ["--version"]     = version  >>  exitSuccess
+parse ("-i":fs)         = parse fs >>= input
+parse ("--input":fs)    = parse fs >>= input
+parse ("-s":fs)         = parse fs >>= simplify
+parse ("--simplify":fs) = parse fs >>= simplify
+parse ("-w":fs)         = parse fs >>= weighing
+parse ("--weigh":fs)    = parse fs >>= weighing
 parse []                = getContents
 parse fs                = concat `fmap` mapM readFile fs
 
@@ -37,26 +37,22 @@ version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
 
 input,simplify,weighing :: String -> IO String
 input fs = do
-  inp <- return fs
+  let inp = fs
   (writeInput . inJ . inputParser . lexer) inp
   putStrLn "Opening inputCanvas.html"
   system "open js/inputCanvas.html"
-  exit
+  exitSuccess
 
 simplify fs = do
-  inp <- return fs
+  let inp = fs
   (writeSimple . siJ . inputParser . lexer) inp
   putStrLn "Opening simpleCanvas.html"
   system "open js/simpleCanvas.html"
-  exit
+  exitSuccess
 
 weighing fs = do
-  inp <- return fs
+  let inp = fs
   (writeWeighted . weJ . inputParser . lexer) inp
   putStrLn "Opening weightedCanvas.html"
   system "open js/weightedCanvas.html"
-  exit
-
-exit, die :: IO String
-exit    = exitWith ExitSuccess
-die     = exitWith (ExitFailure 1)
+  exitSuccess

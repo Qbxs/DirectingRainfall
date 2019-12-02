@@ -2,6 +2,7 @@ module Tarps where
 
 import Data.List
 import Data.Tuple
+import Data.Graph
 import Control.Applicative
 import InputParser (Input(..), Range, Point, Tarp(..))
 
@@ -58,10 +59,10 @@ quicksort p (x:xs) = lesser ++ [x] ++ greater
 
 -- less eficient but safe sort (isUpper is not transitive)
 maxSort p [] = []
-maxSort p l  = (fst $ maxList l):maxSort p (snd $ maxList l)
+maxSort p l  = fst (maxList l):maxSort p (snd $ maxList l)
          where maxList [x]    = (x,[])
-               maxList (x:xs) = if p x (fst $ maxList xs)
-                                then (x,(fst $ maxList xs):(snd $ maxList xs))
+               maxList (x:xs) = if x `p` fst (maxList xs)
+                                then (x,uncurry (:) (maxList xs))
                                 else (fst $ maxList xs,x:(snd $ maxList xs))
 
 
@@ -99,7 +100,7 @@ intervals = foldr $ \(S (x1,x2) _) xs -> [x1,x2] ++ xs
 
 -- sort out intervals that are not part of the tarp
 sortOut :: (SimpleTarp,[Int]) -> (SimpleTarp,[Int])
-sortOut ((S (x1,x2) o),[])   = ((S (x1,x2) o),[])
+sortOut ((S (x1,x2) o),[])   = (S (x1,x2) o,[])
 sortOut ((S (x1,x2) o),r:rs)
                  | r < x1    = sortOut (S (x1,x2) o,rs)
                  | r > x2    = (S (x1,x2) o,[])
@@ -108,11 +109,11 @@ sortOut ((S (x1,x2) o),r:rs)
 toRanges :: [Int] -> [Range]
 toRanges [] = []
 toRanges [_] = []
-toRanges (a:xs@(b:_)) = (a,b):(toRanges xs)
+toRanges (a:xs@(b:_)) = (a,b):toRanges xs
 
 -- turn around intervals if tarp is orienteted towards left
 turn :: (SimpleTarp,[Range]) -> (SimpleTarp,[Range])
-turn s@((S _ R),_) = (reverse . map swap) <$> s
+turn s@((S _ R),_) = reverse . map swap <$> s
 turn s             = s
 
 -- new type for tarps, split into intervals with cost to reach
@@ -167,9 +168,9 @@ costAbove s@(S _ N) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on N
               | otherwise           = costAbove s (a,b) ((S (x1,x2) R,rs):ts)
 costAbove s@(S _ _) (a,b) ((S (x1,x2) N,(r1,r2,c):rs):ts) -- N on any
               | (a,b) == (r1,r2)    = (a,b,c)
-              | (a,b) == (r2,r1)    = (a,b,c)
+              | (b,a) == (r1,r2)    = (a,b,c)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) N,rs):ts)
-
+ 
 
 flow :: [WeightedRange] -> [WeightedRange]
 flow []             = []
@@ -187,7 +188,7 @@ weigh v ((s,rs):ts) = (s,flow $ map (\r -> costAbove s r w) rs):w
 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
-solution (Input (a,b) _ ts) = minimum $ minimum <$> (map thd3 $ vs)
+solution (Input (a,b) _ ts) = minimum $ minimum <$> map thd3 vs
                           where simp = ((S (a,b) N):(map simplify $ reverse $ maxSort upper ts)) ++ [S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
-                                (s,vs) = head $ weigh (a,b) $ map turn $ map (toRanges <$>) $ map sortOut $ map (\x -> (x,ivs)) simp
+                                (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . (\x -> (x,ivs))) simp
