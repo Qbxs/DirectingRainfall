@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Tarps where
 
 import Data.List
@@ -138,7 +140,7 @@ incr x = Just $ x + 1
 costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
 costAbove _         (a,b) []        = (a,b,Nothing)
 costAbove s         r   ((_,[]):ts) = costAbove s r ts
-costAbove s         (a,b) ((t,(_,_,Nothing):rs):ts) --keep looking
+costAbove s         (a,b) ((t,(_,_,Nothing):rs):ts) --keep looking (trivial?)
                                     = costAbove s (a,b) ((t,rs):ts)
 costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on R
               | r2 == b && r2 == x2 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) R,rs):ts))
@@ -170,7 +172,7 @@ costAbove s@(S _ _) (a,b) ((S (x1,x2) N,(r1,r2,c):rs):ts) -- N on any
               | (a,b) == (r1,r2)    = (a,b,c)
               | (b,a) == (r1,r2)    = (a,b,c)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) N,rs):ts)
- 
+
 
 flow :: [WeightedRange] -> [WeightedRange]
 flow []             = []
@@ -189,6 +191,6 @@ weigh v ((s,rs):ts) = (s,flow $ map (\r -> costAbove s r w) rs):w
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
 solution (Input (a,b) _ ts) = minimum $ minimum <$> map thd3 vs
-                          where simp = ((S (a,b) N):(map simplify $ reverse $ maxSort upper ts)) ++ [S (a,b) N]
+                          where simp = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
-                                (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . (\x -> (x,ivs))) simp
+                                (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ivs)) simp

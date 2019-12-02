@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TupleSections #-}
 
 module Exports where
 
@@ -64,7 +65,7 @@ instance ToJSON JWeighted
 
 weighted :: Input -> WeightedTarps
 weighted (Input (a,b) _ ts) = weigh (a,b) $ map (turn . (toRanges <$>)
-                              . sortOut . (\x -> (x,ivs))) simp
+                              . sortOut . ( ,ivs)) simp
                           where simp = (S (a,b) N):(map simplify $ reverse $ maxSort upper ts)++[S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
 
