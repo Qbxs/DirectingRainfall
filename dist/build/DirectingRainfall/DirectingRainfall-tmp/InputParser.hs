@@ -88,7 +88,7 @@ happyAdjustOffset :: Happy_GHC_Exts.Int# -> Happy_GHC_Exts.Int#
 happyAdjustOffset off = off
 
 happyDefActions :: HappyAddr
-happyDefActions = HappyA# "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xfd\xff\x00\x00\xfc\xff\xfe\xff\xfb\xff\x00\x00\x00\x00\xf8\xff\xf9\xff\xfa\xff"#
+happyDefActions = HappyA# "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xfd\xff\xfb\xff\xfc\xff\xfe\xff\xfb\xff\x00\x00\x00\x00\xf8\xff\xf9\xff\xfa\xff"#
 
 happyCheck :: HappyAddr
 happyCheck = HappyA# "\xff\xff\x03\x00\x04\x00\x05\x00\x03\x00\x04\x00\x05\x00\x00\x00\x01\x00\x01\x00\x01\x00\x01\x00\xff\xff\x02\x00\x01\x00\x01\x00\x01\x00\x05\x00\x02\x00\xff\xff\xff\xff\xff\xff\xff\xff"#
@@ -136,12 +136,10 @@ happyReduction_3 happy_x_1
 		 (happy_var_1
 	)}
 
-happyReduce_4 = happySpecReduce_1  3# happyReduction_4
-happyReduction_4 happy_x_1
-	 =  case happyOut8 happy_x_1 of { happy_var_1 -> 
-	happyIn7
-		 ([happy_var_1]
-	)}
+happyReduce_4 = happySpecReduce_0  3# happyReduction_4
+happyReduction_4  =  happyIn7
+		 ([]
+	)
 
 happyReduce_5 = happySpecReduce_2  3# happyReduction_5
 happyReduction_5 happy_x_2

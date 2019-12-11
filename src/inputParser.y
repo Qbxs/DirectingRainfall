@@ -21,7 +21,7 @@ Tarps    :: { Int }
          : int                     { $1 }
 
 Tarplist :: { [Tarp] }
-         : Tarp                    { [$1] }
+         : {- empty -}             { [] }
          | Tarp Tarplist           { $1:$2 }
 
 Tarp     :: { Tarp }
