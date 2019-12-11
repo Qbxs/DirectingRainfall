@@ -66,7 +66,7 @@ instance ToJSON JWeighted
 weighted :: Input -> WeightedTarps
 weighted (Input (a,b) _ ts) = weigh (a,b) $ map (turn . (toRanges <$>)
                               . sortOut . ( ,ivs)) simp
-                          where simp = (S (a,b) N):(map simplify $ reverse $ maxSort upper ts)++[S (a,b) N]
+                          where simp = S (a,b) N:(map simplify $ reverse $ maxSort upper ts)++[S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
 
 fromMaybe :: Cost -> Int
@@ -74,7 +74,7 @@ fromMaybe Nothing  = -1
 fromMaybe (Just x) = x
 
 weJ :: Input -> JWeighted
-weJ i@(Input (a,b) _ ts) = JWeighted a b $
+weJ i@(Input (a,b) _ ts) = JWeighted a b
                                 (map (\(S (x1,x2) o,rs)
                                   -> JTarp x1 x2 (if o == L then -1 else if o == R then 1 else 0)
                                     (map (\(x,y,c) -> [x,y,fromMaybe c]) rs)) $ weighted i)

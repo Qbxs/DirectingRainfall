@@ -4,7 +4,7 @@ import Exports
 import Data.Aeson
 import GHC.Generics
 import System.Environment
-import System.Exit hiding (die)
+import System.Exit
 import System.Process
 import System.Directory
 
@@ -23,7 +23,7 @@ parse ("--simplify":fs) = parse fs >>= simplify
 parse ("-w":fs)         = parse fs >>= weighing
 parse ("--weigh":fs)    = parse fs >>= weighing
 parse []                = getContents
-parse fs                = concat `fmap` mapM readFile fs
+parse fs                = concat <$> mapM readFile fs
 
 usage, version :: IO()
 usage   = do
@@ -37,22 +37,19 @@ version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
 
 input,simplify,weighing :: String -> IO String
 input fs = do
-  let inp = fs
-  (writeInput . inJ . inputParser . lexer) inp
+  (writeInput . inJ . inputParser . lexer) fs
   putStrLn "Opening inputCanvas.html"
   system "open js/inputCanvas.html"
   exitSuccess
 
 simplify fs = do
-  let inp = fs
-  (writeSimple . siJ . inputParser . lexer) inp
+  (writeSimple . siJ . inputParser . lexer) fs
   putStrLn "Opening simpleCanvas.html"
   system "open js/simpleCanvas.html"
   exitSuccess
 
 weighing fs = do
-  let inp = fs
-  (writeWeighted . weJ . inputParser . lexer) inp
+  (writeWeighted . weJ . inputParser . lexer) fs
   putStrLn "Opening weightedCanvas.html"
   system "open js/weightedCanvas.html"
   exitSuccess

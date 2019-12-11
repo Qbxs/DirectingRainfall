@@ -33,11 +33,10 @@ upper :: Tarp -> Tarp -> Bool
 upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
   = case overlap (tarpRange t1) (tarpRange t2) of
     Nothing    -> a2 >= c2
-    Just (x,y) -> if a2 >= d2 then True else
-                  if c2 >= b2 then False else
+    Just (x,y) -> a2 >= d2
                -- here: all cases for which t1 overlaps t2 partially
                -- consider all combinations of {a,b} x {c,d} => 8
-                     x == a1 && y == c1 && a2 > c2
+                  || x == a1 && y == c1 && a2 > c2
                   || x == a1 && y == d1 && b2 > d2
                   || x == b1 && y == c1 && b2 > c2
                   || x == b1 && y == d1 && b2 > d2
@@ -102,8 +101,8 @@ intervals = foldr $ \(S (x1,x2) _) xs -> [x1,x2] ++ xs
 
 -- sort out intervals that are not part of the tarp
 sortOut :: (SimpleTarp,[Int]) -> (SimpleTarp,[Int])
-sortOut ((S (x1,x2) o),[])   = (S (x1,x2) o,[])
-sortOut ((S (x1,x2) o),r:rs)
+sortOut (S (x1,x2) o,[])    = (S (x1,x2) o,[])
+sortOut (S (x1,x2) o,r:rs)
                  | r < x1    = sortOut (S (x1,x2) o,rs)
                  | r > x2    = (S (x1,x2) o,[])
                  | otherwise = (\(x,ys) -> (x,r:ys)) $ sortOut (S (x1,x2) o,rs)
@@ -115,8 +114,8 @@ toRanges (a:xs@(b:_)) = (a,b):toRanges xs
 
 -- turn around intervals if tarp is orienteted towards left
 turn :: (SimpleTarp,[Range]) -> (SimpleTarp,[Range])
-turn s@((S _ R),_) = reverse . map swap <$> s
-turn s             = s
+turn s@(S _ R,_) = reverse . map swap <$> s
+turn s           = s
 
 -- new type for tarps, split into intervals with cost to reach
 type WeightedTarps = [(SimpleTarp,[WeightedRange])]
@@ -133,7 +132,7 @@ minRange :: WeightedRange -> WeightedRange -> WeightedRange
 minRange (a,b,c) (_,_,z) = (a,b,minCost c z)
 
 
-incr :: Num a => a -> Maybe a
+incr :: (Num a) => a -> Maybe a
 incr x = Just $ x + 1
 
 -- calculate costs of an interval of a tarp based on costs of tarps above
@@ -182,15 +181,17 @@ flow ((r1,r2,c):ws) = (r1,r2,minCost c (thd3 $ head flowed)):flowed
 
 
 weigh :: Range -> [(SimpleTarp,[Range])] -> WeightedTarps
-weigh _ []          = []
-weigh v [(s,rs)]     = [(s,map (\(x,y) -> (x,y,Just 0)) rs)]
-weigh v ((s,rs):ts) = (s,flow $ map (\r -> costAbove s r w) rs):w
-                        where w = weigh v ts
+weigh _ []                  = []
+weigh v [(s,rs)]            = [(s,map (\(x,y) -> (x,y,Just 0)) rs)]
+weigh v ((s@(S _ N),rs):ts) = (s,map (\r -> costAbove s r w) rs):w
+                              where w = weigh v ts
+weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r w) rs):w
+                              where w = weigh v ts
 
 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
-solution (Input (a,b) _ ts) = minimum $ minimum <$> map thd3 vs
-                          where simp = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
-                                ivs = map head . group . sort $ intervals [a,b] simp
-                                (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ivs)) simp
+solution (Input (a,b) _ ts) = minimum $ minimum <$> map thd3 $ flow vs
+                        where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
+                              ivs    = map head . group . sort $ intervals [a,b] simp
+                              (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ivs)) simp
