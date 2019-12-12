@@ -8,6 +8,7 @@ html, body {
   margin: 0;
   background-color: #2e2e2e;
 }
+
 h1 {
   opacity: 1;
   font-family: helvetica neue;
@@ -17,6 +18,7 @@ h1 {
   margin-top: 0;
   padding: 4px;
 }
+
 p {
   padding-left: 22px;
 }
