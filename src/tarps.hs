@@ -101,15 +101,15 @@ intervals = foldr $ \(S (x1,x2) _) xs -> [x1,x2] ++ xs
 
 -- sort out intervals that are not part of the tarp
 sortOut :: (SimpleTarp,[Int]) -> (SimpleTarp,[Int])
-sortOut (S (x1,x2) o,[])    = (S (x1,x2) o,[])
+sortOut (S (x1,x2) o,[])     = (S (x1,x2) o,[])
 sortOut (S (x1,x2) o,r:rs)
                  | r < x1    = sortOut (S (x1,x2) o,rs)
                  | r > x2    = (S (x1,x2) o,[])
                  | otherwise = (\(x,ys) -> (x,r:ys)) $ sortOut (S (x1,x2) o,rs)
 
 toRanges :: [Int] -> [Range]
-toRanges [] = []
-toRanges [_] = []
+toRanges []           = []
+toRanges [_]          = []
 toRanges (a:xs@(b:_)) = (a,b):toRanges xs
 
 -- turn around intervals if tarp is orienteted towards left
@@ -191,7 +191,8 @@ weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r w) rs):w
 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
-solution (Input (a,b) _ ts) = minimum $ minimum <$> map thd3 $ flow vs
-                        where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
-                              ivs    = map head . group . sort $ intervals [a,b] simp
-                              (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ivs)) simp
+solution (Input (a,b) _ ts)
+         = minimum $ minimum <$> map thd3 $ flow vs
+           where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
+                 ranges = map head . group . sort $ intervals [a,b] simp
+                 (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp
