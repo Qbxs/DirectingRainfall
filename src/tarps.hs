@@ -4,7 +4,7 @@ module Tarps where
 
 import Data.List
 import Data.Tuple
-import Data.Graph
+import Data.Maybe
 import Control.Applicative
 import InputParser (Input(..), Range, Point, Tarp(..))
 
@@ -191,7 +191,7 @@ weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r w) rs):w
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
 solution (Input (a,b) _ ts)
-         = minimum $ map (minimum . thd3) $ flow vs
+         = fromJust $ minimum <$> map thd3 $ flow vs
            where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
                  ranges = map head . group . sort $ intervals [a,b] simp
                  (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp
