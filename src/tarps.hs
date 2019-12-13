@@ -50,7 +50,6 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == c1 && y == d1 && b2 > d2
                   || x == d1 && y == c1 && b2 > d2
 
-
 quicksort, maxSort :: (a -> a -> Bool) -> [a] -> [a]
 -- this does not do the trick :(
 quicksort p []     = []
@@ -192,7 +191,7 @@ weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r w) rs):w
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
 solution (Input (a,b) _ ts)
-         = minimum $ minimum <$> map thd3 $ flow vs
+         = minimum $ map (minimum . thd3) $ flow vs
            where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
                  ranges = map head . group . sort $ intervals [a,b] simp
                  (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp
