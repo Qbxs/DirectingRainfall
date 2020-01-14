@@ -45,7 +45,6 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                      || x == c1 && y == b1 && b2 > c2
                      || x == d1 && y == a1 && a2 > c2
                      || x == d1 && y == b1 && b2 > d2
-                     -- all cases of total overlap where t1 is higher
                      || G.pointInside (a1,a2) (G.RTri (abs $ c1-d1) (abs $ c2-d2) $ G.Tri (c1,c2) (d1,d2) (c1,d2))
                      || G.pointInside (d1,d2) (G.RTri (abs $ a1-b1) (abs $ a2-b2) $ G.Tri (a1,a2) (b1,b2) (b1,a2))))
 
@@ -54,9 +53,8 @@ maxSort :: (a -> a -> Bool) -> [a] -> [a]
 maxSort p [] = []
 maxSort p l  = fst (maxList l):maxSort p (snd $ maxList l)
          where maxList [x]    = (x,[])
-               maxList (x:xs) = if x `p` fst (maxList xs)
-                                then (x,uncurry (:) (maxList xs))
-                                else (fst $ maxList xs,x:(snd $ maxList xs))
+               maxList (x:xs) | x `p` fst (maxList xs) = (x,uncurry (:) (maxList xs))
+                              | otherwise              = (fst $ maxList xs,x:(snd $ maxList xs))
 
 
 
@@ -70,7 +68,7 @@ data Orientation = L | R | N --left | right | neutral(vineyard)
 simplify :: Tarp -> SimpleTarp
 simplify t@(T (x1,_) (x2,_)) = S (tarpRange t) $ if x1 < x2 then L else R
 
---  get all intervals once for computation efficency
+-- get all intervals once for computation efficency
 -- gives list of all relevant intervals, first arg is range as a 2-elem-list
 intervals :: [Int] -> [SimpleTarp] -> [Int]
 intervals = foldr $ \(S (x1,x2) _) xs -> [x1,x2] ++ xs
@@ -88,16 +86,17 @@ toRanges []           = []
 toRanges [_]          = []
 toRanges (a:xs@(b:_)) = (a,b):toRanges xs
 
--- turn around intervals if tarp is orienteted towards left
+-- turn around intervals if tarp is orienteted towards right
 turn :: (SimpleTarp,[Range]) -> (SimpleTarp,[Range])
 turn s@(S _ R,_) = reverse . map swap <$> s
 turn s           = s
 
--- new type for tarps, split into intervals with cost to reach
+-- new type for tarps, split into ranges with cost to reach
 type WeightedTarps = [(SimpleTarp,[WeightedRange])]
 type WeightedRange = (Int,Int,Cost)
 type Cost          = Maybe Int
 
+-- minCost unlike (min <$>)
 minCost :: Cost -> Cost -> Cost
 minCost (Just c) (Just d) = Just $ min c d
 minCost (Just c) Nothing  = Just c
@@ -152,7 +151,7 @@ flow [w]            = [w]
 flow ((r1,r2,c):ws) = (r1,r2,minCost c (thd3 $ head flowed)):flowed
                     where flowed = flow ws
 
--- filter out tarps that don't overlap
+-- filter out tarps that don't overlap with given tarp
 filterTarps :: SimpleTarp -> WeightedTarps -> WeightedTarps
 filterTarps s = filter (tarpOverlap s) where
   tarpOverlap (S a _) (S b _,_) = isJust $ overlap a b
