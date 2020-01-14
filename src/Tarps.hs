@@ -34,21 +34,22 @@ tarpRange (T (a,_) (b,_)) = (min a b,max a b)
 upper :: Tarp -> Tarp -> Bool
 upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
   = case overlap (tarpRange t1) (tarpRange t2) of
-    Nothing    -> a2 >= c2
-    Just (x,y) -> a2 >= d2                  -- lower point is higher than upper point
+    Nothing    -> a2 >= d2 || (max a1 b1) >= (min c1 d1)
+    Just (x,y) -> a2 >= d2 ||          -- lower point is higher than upper point
                -- here: all cases for which t1 overlaps t2 partially
                -- consider all combinations of {a,b} x {c,d} => 8
-                  || x == a1 && y == c1 && a2 > c2
-                  || x == a1 && y == d1 && b2 > d2
-                  || x == b1 && y == c1 && b2 > c2
-                  || x == b1 && y == d1 && b2 > d2
-                  || x == c1 && y == a1 && a2 > c2
-                  || x == c1 && y == b1 && b2 > c2
-                  || x == d1 && y == a1 && a2 > c2
-                  || x == d1 && y == b1 && b2 > d2
-               -- here: all cases of total overlap where t1 is higher
-                  || G.pointInside (a1,a2) (G.Tri (c1,c2) (d1,d2) (c1,d2))
-                  || G.pointInside (d1,d2) (G.Tri (a1,a2) (b1,b2) (b1,a2))
+                  if c2 >= b2 then False
+                  else  x == a1 && y == c1 && a2 > c2
+                     || x == a1 && y == d1 && b2 > d2
+                     || x == b1 && y == c1 && b2 > c2
+                     || x == b1 && y == d1 && b2 > d2
+                     || x == c1 && y == a1 && a2 > c2
+                     || x == c1 && y == b1 && b2 > c2
+                     || x == d1 && y == a1 && a2 > c2
+                     || x == d1 && y == b1 && b2 > d2
+                     -- all cases of total overlap where t1 is higher
+                     || G.pointInside (a1,a2) (G.Tri (c1,c2) (d1,d2) (c1,d2))
+                     || G.pointInside (d1,d2) (G.Tri (a1,a2) (b1,b2) (b1,a2))
 
 -- quadratic but safe sorting (upper is not transitive)
 maxSort :: (a -> a -> Bool) -> [a] -> [a]
@@ -170,7 +171,7 @@ weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r (filterTarps s 
 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
-solution (Input (a,b) _ ts) = fromJust $ minimum <$> map thd3 $ flow vs
+solution (Input (a,b) _ ts) = fromJust $ minimum <$> map thd3 $ flow rs
            where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
                  ranges = map head . group . sort $ intervals [a,b] simp
-                 (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp
+                 (s,rs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp

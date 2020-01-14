@@ -26,14 +26,14 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,1,0,0] []
+version = Version [1,0,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/Users/pascalengel/.cabal/bin"
-libdir     = "/Users/pascalengel/.cabal/lib/x86_64-osx-ghc-8.8.1/DirectingRainfall-0.1.0.0-ARprtZHJEFu7MaKGE77UOv-DirectingRainfall"
+libdir     = "/Users/pascalengel/.cabal/lib/x86_64-osx-ghc-8.8.1/DirectingRainfall-1.0.0.0-8cfpGQAMisfKqGljiz05J2-DirectingRainfall"
 dynlibdir  = "/Users/pascalengel/.cabal/lib/x86_64-osx-ghc-8.8.1"
-datadir    = "/Users/pascalengel/.cabal/share/x86_64-osx-ghc-8.8.1/DirectingRainfall-0.1.0.0"
-libexecdir = "/Users/pascalengel/.cabal/libexec/x86_64-osx-ghc-8.8.1/DirectingRainfall-0.1.0.0"
+datadir    = "/Users/pascalengel/.cabal/share/x86_64-osx-ghc-8.8.1/DirectingRainfall-1.0.0.0"
+libexecdir = "/Users/pascalengel/.cabal/libexec/x86_64-osx-ghc-8.8.1/DirectingRainfall-1.0.0.0"
 sysconfdir = "/Users/pascalengel/.cabal/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath

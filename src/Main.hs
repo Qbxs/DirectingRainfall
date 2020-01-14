@@ -1,4 +1,4 @@
-import Tarps hiding (simplify)
+import qualified Tarps as T
 import InputParser (Input(..), Range, Point, Tarp(..), lexer, inputParser)
 import Exports
 import Data.Aeson
@@ -9,7 +9,7 @@ import System.Process
 import System.Directory
 
 main :: IO()
-main = getArgs >>= parse >>= (print . Tarps.solution . inputParser . lexer)
+main = getArgs >>= parse >>= (print . T.solution . inputParser . lexer)
 
 parse :: [String] -> IO String
 parse ["-h"]            = usage    >>  exitSuccess
