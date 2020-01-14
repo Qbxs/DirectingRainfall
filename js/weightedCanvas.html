@@ -8,7 +8,7 @@
     function draw() {
       var c = document.getElementById("canvas");
       var ctx = c.getContext("2d");
-      ctx.font = "14px Helvetica";
+      ctx.font = "20px Helvetica";
       ctx.textAlign = "center";
 
       function drawLine(x1, y1, x2, y2) {
@@ -76,10 +76,11 @@
 </head>
 
 <body onload="draw()">
-  <h1>Weighted Tarps</h1>
-  <canvas id="canvas" width="900" height="900">
-    Weighted Tarps
-  </canvas>
+  <div style="text-align:center;">
+    <canvas id="canvas" width="900" height="900">
+      Weighted Tarps
+    </canvas>
+  </div>
 </body>
 
 </html>
