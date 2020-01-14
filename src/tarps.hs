@@ -7,6 +7,7 @@ import Data.Tuple
 import Data.Maybe
 import Control.Applicative
 import InputParser (Input(..), Range, Point, Tarp(..))
+import qualified Geometry as G
 
 instance Functor ((,,) a b) where
   fmap f (x,y,z) = (x,y,f z)
@@ -29,11 +30,12 @@ tarpRange (T (a,_) (b,_)) = (min a b,max a b)
 
 -- is t1 topologically above t2?
 -- =(will be hit first vertically)
+-- (a1,a2) and (c1,c2) are lower points respectively
 upper :: Tarp -> Tarp -> Bool
 upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
   = case overlap (tarpRange t1) (tarpRange t2) of
     Nothing    -> a2 >= c2
-    Just (x,y) -> a2 >= d2
+    Just (x,y) -> a2 >= d2                  -- lower point is higher than upper point
                -- here: all cases for which t1 overlaps t2 partially
                -- consider all combinations of {a,b} x {c,d} => 8
                   || x == a1 && y == c1 && a2 > c2
@@ -45,19 +47,11 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                   || x == d1 && y == a1 && a2 > c2
                   || x == d1 && y == b1 && b2 > d2
                -- here: all cases of total overlap where t1 is higher
-                  || x == a1 && y == b1 && a2 > c2
-                  || x == b1 && y == a1 && a2 > c2
-                  || x == c1 && y == d1 && b2 > d2
-                  || x == d1 && y == c1 && b2 > d2
+                  || G.pointInside (a1,a2) (G.Tri (c1,c2) (d1,d2) (c1,d2))
+                  || G.pointInside (d1,d2) (G.Tri (a1,a2) (b1,b2) (b1,a2))
 
-quicksort, maxSort :: (a -> a -> Bool) -> [a] -> [a]
--- this does not do the trick :(
-quicksort p []     = []
-quicksort p (x:xs) = lesser ++ [x] ++ greater
-               where lesser = quicksort p [a | a <- xs, not $ p x a]
-                     greater = quicksort p [a | a <- xs, p x a]
-
--- less eficient but safe sort (isUpper is not transitive)
+-- quadratic but safe sorting (upper is not transitive)
+maxSort :: (a -> a -> Bool) -> [a] -> [a]
 maxSort p [] = []
 maxSort p l  = fst (maxList l):maxSort p (snd $ maxList l)
          where maxList [x]    = (x,[])
@@ -77,23 +71,7 @@ data Orientation = L | R | N --left | right | neutral(vineyard)
 simplify :: Tarp -> SimpleTarp
 simplify t@(T (x1,_) (x2,_)) = S (tarpRange t) $ if x1 < x2 then L else R
 
-
--- METHOD A: beam intervals down for data efficiency
-
--- split into all relevant intervals
-split :: Range -> [SimpleTarp] -> [(SimpleTarp,[Int])]
-split _     []                     = []
-split (a,b) [t]                    = [(t,[a,b])]
-split r     (t:w@((S (x,y) _):ts)) = let s = split r w in
-                                     (t,(++) [x,y] $ snd $ head s):s
-
--- remove duplicates and sort intervals
-clean :: (Ord b) => [(a,[b])] -> [(a,[b])]
-clean = map $ fmap $ map head . group . sort
-
-
--- METHOD B: get all intervals for computation efficency
-
+--  get all intervals once for computation efficency
 -- gives list of all relevant intervals, first arg is range as a 2-elem-list
 intervals :: [Int] -> [SimpleTarp] -> [Int]
 intervals = foldr $ \(S (x1,x2) _) xs -> [x1,x2] ++ xs
@@ -130,7 +108,6 @@ minCost Nothing  Nothing  = Nothing
 minRange :: WeightedRange -> WeightedRange -> WeightedRange
 minRange (a,b,c) (_,_,z) = (a,b,minCost c z)
 
-
 incr :: (Num a) => a -> Maybe a
 incr x = Just $ x + 1
 
@@ -138,8 +115,6 @@ incr x = Just $ x + 1
 costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
 costAbove _         (a,b) []        = (a,b,Nothing)
 costAbove s         r   ((_,[]):ts) = costAbove s r ts
-costAbove s         (a,b) ((t,(_,_,Nothing):rs):ts) --keep looking (trivial?)
-                                    = costAbove s (a,b) ((t,rs):ts)
 costAbove s@(S _ R) (a,b) ((S (x1,x2) R,(r2,r1,c):rs):ts) -- R on R
               | r2 == b && r2 == x2 = minRange (a,b,c) (costAbove s (a,b) ((S (x1,x2) R,rs):ts))
               | (b,a) == (r1,r2)    = (a,b,c >>= incr)
@@ -171,27 +146,31 @@ costAbove s@(S _ _) (a,b) ((S (x1,x2) N,(r1,r2,c):rs):ts) -- N on any
               | (b,a) == (r1,r2)    = (a,b,c)
               | otherwise           = costAbove s (a,b) ((S (x1,x2) N,rs):ts)
 
-
+-- let water flow down a tarp (overwriting with minimum)
 flow :: [WeightedRange] -> [WeightedRange]
 flow []             = []
 flow [w]            = [w]
 flow ((r1,r2,c):ws) = (r1,r2,minCost c (thd3 $ head flowed)):flowed
                     where flowed = flow ws
 
+-- filter out tarps that don't overlap
+filterTarps :: SimpleTarp -> WeightedTarps -> WeightedTarps
+filterTarps s = filter (tarpOverlap s) where
+  tarpOverlap (S a _) (S b _,_) = isJust $ overlap a b
 
+-- calculate all costs
 weigh :: Range -> [(SimpleTarp,[Range])] -> WeightedTarps
 weigh _ []                  = []
 weigh v [(s,rs)]            = [(s,map (\(x,y) -> (x,y,Just 0)) rs)]
-weigh v ((s@(S _ N),rs):ts) = (s,map (\r -> costAbove s r w) rs):w
+weigh v ((s@(S _ N),rs):ts) = (s,map (\r -> costAbove s r (filterTarps s w)) rs):w
                               where w = weigh v ts
-weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r w) rs):w
+weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r (filterTarps s w)) rs):w
                               where w = weigh v ts
 
 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
-solution (Input (a,b) _ ts)
-         = fromJust $ minimum <$> map thd3 $ flow vs
+solution (Input (a,b) _ ts) = fromJust $ minimum <$> map thd3 $ flow vs
            where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
                  ranges = map head . group . sort $ intervals [a,b] simp
                  (s,vs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp

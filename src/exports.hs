@@ -85,3 +85,5 @@ writeWeighted s = do
   i <- readFile "js/temp.json"
   writeFile "js/weighted.json" ("weighted="++i)
   removeFile "js/temp.json"
+
+-- TODO: fix inefficent encoding

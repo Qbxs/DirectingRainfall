@@ -16,12 +16,11 @@ maintainer:          ip4ssi@gmail.com
 -- copyright:
 category:            Graphics
 build-type:          Simple
-extra-source-files:  CHANGELOG.md, readme.md
+extra-source-files:  CHANGELOG.md, Readme.md
 
 executable DirectingRainfall
   main-is:             Main.hs
-  other-modules:       InputParser, Tarps, Exports
-  -- other-extensions:
+  other-modules:       InputParser, Tarps, Exports, Geometry
   build-depends:       base >=4.3 && <5,
                        array,
                        process,
