@@ -28,12 +28,12 @@ parse fs                = concat <$> mapM readFile fs
 usage, version :: IO()
 usage   = do
   putStrLn "Solves for given input file the minimum amount of holes to be put in the tarps."
-  putStrLn "Usage:"
-  putStrLn "    - cabal run ..            Calculate an optimal solution"
-  putStrLn "    - cabal run -- -i ..      Show input tarps in browser"
-  putStrLn "    - cabal run -- -s ..      Show simplified tarps in browser"
-  putStrLn "    - cabal run -- -w ..      Show weighted tarps in browser"
-version = putStrLn "Haskell DirectingRainfall 0.1 2019 Pascal Engel"
+  putStrLn "Usage: (.. file)"
+  putStrLn "        ..      Calculate an optimal solution"
+  putStrLn "     -i ..      Show input tarps in browser"
+  putStrLn "     -s ..      Show simplified tarps in browser"
+  putStrLn "     -w ..      Show weighted tarps in browser"
+version = putStrLn "Haskell DirectingRainfall 1.0 2019 Pascal Engel"
 
 input,simplify,weighing :: String -> IO String
 input fs = do
