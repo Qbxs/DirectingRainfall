@@ -34,12 +34,10 @@ tarpRange (T (a,_) (b,_)) = (min a b,max a b)
 upper :: Tarp -> Tarp -> Bool
 upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
   = case overlap (tarpRange t1) (tarpRange t2) of
-    Nothing    -> a2 >= d2 || (max a1 b1) >= (min c1 d1)
-    Just (x,y) -> a2 >= d2 ||          -- lower point is higher than upper point
-               -- here: all cases for which t1 overlaps t2 partially
-               -- consider all combinations of {a,b} x {c,d} => 8
-                  if c2 >= b2 then False
-                  else  x == a1 && y == c1 && a2 > c2
+    Nothing    -> a2 >= d2 || max a1 b1 >= min c1 d1
+    Just (x,y) -> a2 >= d2 ||
+                   (c2 < b2
+                    && (x == a1 && y == c1 && a2 > c2
                      || x == a1 && y == d1 && b2 > d2
                      || x == b1 && y == c1 && b2 > c2
                      || x == b1 && y == d1 && b2 > d2
@@ -48,8 +46,8 @@ upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
                      || x == d1 && y == a1 && a2 > c2
                      || x == d1 && y == b1 && b2 > d2
                      -- all cases of total overlap where t1 is higher
-                     || G.pointInside (a1,a2) (G.Tri (c1,c2) (d1,d2) (c1,d2))
-                     || G.pointInside (d1,d2) (G.Tri (a1,a2) (b1,b2) (b1,a2))
+                     || G.pointInside (a1,a2) (G.RTri (abs $ c1-d1) (abs $ c2-d2) $ G.Tri (c1,c2) (d1,d2) (c1,d2))
+                     || G.pointInside (d1,d2) (G.RTri (abs $ a1-b1) (abs $ a2-b2) $ G.Tri (a1,a2) (b1,b2) (b1,a2))))
 
 -- quadratic but safe sorting (upper is not transitive)
 maxSort :: (a -> a -> Bool) -> [a] -> [a]
