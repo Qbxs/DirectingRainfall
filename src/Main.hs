@@ -22,6 +22,7 @@ parse ("-s":fs)         = parse fs >>= simplify
 parse ("--simplify":fs) = parse fs >>= simplify
 parse ("-w":fs)         = parse fs >>= weighing
 parse ("--weigh":fs)    = parse fs >>= weighing
+parse (('-':_):_)       = die "Error: Unknown command"
 parse []                = getContents
 parse fs                = concat <$> mapM readFile fs
 
@@ -37,19 +38,19 @@ version = putStrLn "Haskell DirectingRainfall 1.0 2019 Pascal Engel"
 
 input,simplify,weighing :: String -> IO String
 input fs = do
-  (writeInput . inJ . inputParser . lexer) fs
+  (writeInput . inputJSON . inputParser . lexer) fs
   putStrLn "Opening inputCanvas.html"
   system "open js/inputCanvas.html"
   exitSuccess
 
 simplify fs = do
-  (writeSimple . siJ . inputParser . lexer) fs
+  (writeSimple . simplifiedJSON . inputParser . lexer) fs
   putStrLn "Opening simpleCanvas.html"
   system "open js/simpleCanvas.html"
   exitSuccess
 
 weighing fs = do
-  (writeWeighted . weJ . inputParser . lexer) fs
+  (writeWeighted . weightedJSON . inputParser . lexer) fs
   putStrLn "Opening weightedCanvas.html"
   system "open js/weightedCanvas.html"
   exitSuccess

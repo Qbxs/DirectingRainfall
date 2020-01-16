@@ -7,56 +7,43 @@ import Data.Tuple
 import Data.Maybe
 import Control.Applicative
 import InputParser (Input(..), Range, Point, Tarp(..))
-import qualified Geometry as G
+import Geometry
 
 instance Functor ((,,) a b) where
   fmap f (x,y,z) = (x,y,f z)
 
 thd3 :: (a,b,c) -> c
-thd3 (a,b,c) = c
+thd3 = \(a,b,c) -> c
 
 -- Check whether two ranges overlap and return overlapping range
 overlap :: Range -> Range -> Maybe Range
-overlap (a,b) (c,d) | a <= c && b >= d = Just (c,d)
-                    | a >= c && b <= d = Just (a,b)
-                    | a <= c && b >= c = Just (c,b)
-                    | a >= c && a <= d = Just (a,d)
-                    | otherwise        = Nothing
-
+overlap (a,b) (c,d) | c > b || a > d = Nothing
+                    | otherwise      = Just (max a c,min b d)
 
 tarpRange :: Tarp -> Range
 tarpRange (T (a,_) (b,_)) = (min a b,max a b)
 
 
--- is t1 topologically above t2?
--- =(will be hit first vertically)
--- (a1,a2) and (c1,c2) are lower points respectively
-upper :: Tarp -> Tarp -> Bool
-upper t1@(T (a1,a2) (b1,b2)) t2@(T (c1,c2) (d1,d2))
+upper :: Tarp -> Tarp -> Maybe Bool
+upper t1@(T a@(a1,a2) b@(b1,b2)) t2@(T c@(c1,c2) d@(d1,d2))
   = case overlap (tarpRange t1) (tarpRange t2) of
-    Nothing    -> a2 >= d2 || max a1 b1 >= min c1 d1
-    Just (x,y) -> a2 >= d2 ||
-                   (c2 < b2
-                    && (x == a1 && y == c1 && a2 > c2
-                     || x == a1 && y == d1 && b2 > d2
-                     || x == b1 && y == c1 && b2 > c2
-                     || x == b1 && y == d1 && b2 > d2
-                     || x == c1 && y == a1 && a2 > c2
-                     || x == c1 && y == b1 && b2 > c2
-                     || x == d1 && y == a1 && a2 > c2
-                     || x == d1 && y == b1 && b2 > d2
-                     || G.pointInside (a1,a2) (G.RTri (abs $ c1-d1) (abs $ c2-d2) $ G.Tri (c1,c2) (d1,d2) (c1,d2))
-                     || G.pointInside (d1,d2) (G.RTri (abs $ a1-b1) (abs $ a2-b2) $ G.Tri (a1,a2) (b1,b2) (b1,a2))))
+    Nothing    -> Nothing
+    Just (x,y) -> Just $ a2 >= d2 ||
+                         (c2 < b2
+                          && (x == a1 && pointAbove a (toLine c d)
+                           || y == a1 && pointAbove a (toLine c d)
+                           || x == b1 && pointAbove b (toLine c d)
+                           || y == b1 && pointAbove b (toLine c d)
+                           || x == c1 && (not $ pointAbove d (toLine a b))
+                           || y == c1 && (not $ pointAbove d (toLine a b))))
+
 
 -- quadratic but safe sorting (upper is not transitive)
-maxSort :: (a -> a -> Bool) -> [a] -> [a]
+-- result is in reverse order
+maxSort :: Eq a => (a -> a -> Maybe Bool) -> [a] -> [a]
 maxSort p [] = []
-maxSort p l  = fst (maxList l):maxSort p (snd $ maxList l)
-         where maxList [x]    = (x,[])
-               maxList (x:xs) | x `p` fst (maxList xs) = (x,uncurry (:) (maxList xs))
-                              | otherwise              = (fst $ maxList xs,x:(snd $ maxList xs))
-
-
+maxSort p ts  = maxSort p (ts\\m) ++ m
+              where m = [t | t<-ts, all (fromMaybe True . p t) $ ts\\[t]]
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
 -- if x1<x2 then tarp points to the left else to the right
@@ -169,6 +156,6 @@ weigh v ((s,rs):ts)         = (s,flow $ map (\r -> costAbove s r (filterTarps s 
 -- solve by adding ground as extra tarp and get min Cost of all ranges
 solution :: Input -> Int
 solution (Input (a,b) _ ts) = fromJust $ minimum <$> map thd3 $ flow rs
-           where simp   = S (a,b) N:map simplify (reverse $ maxSort upper ts) ++ [S (a,b) N]
+           where simp   = S (a,b) N:map simplify (maxSort upper ts) ++ [S (a,b) N]
                  ranges = map head . group . sort $ intervals [a,b] simp
                  (s,rs) = head $ weigh (a,b) $ map (turn . (toRanges <$>) . sortOut . ( ,ranges)) simp

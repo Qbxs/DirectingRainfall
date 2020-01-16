@@ -18,8 +18,8 @@ data JInput = JInput {
       } deriving (Show,Generic)
 instance ToJSON JInput
 
-inJ :: Input -> JInput
-inJ (Input (a,b) _ ts) = JInput a b (map (\(T (x1,y1) (x2,y2)) -> [x1,y1,x2,y2]) ts)
+inputJSON :: Input -> JInput
+inputJSON (Input (a,b) _ ts) = JInput a b (map (\(T (x1,y1) (x2,y2)) -> [x1,y1,x2,y2]) ts)
 
 writeInput :: JInput -> IO ()
 writeInput s = do
@@ -36,10 +36,10 @@ data JSimple = JSimple {
       } deriving (Show,Generic)
 instance ToJSON JSimple
 
-siJ :: Input -> JSimple
-siJ (Input (a,b) _ ts) = JSimple a b
+simplifiedJSON :: Input -> JSimple
+simplifiedJSON (Input (a,b) _ ts) = JSimple a b
                           (map ((\(S (x,y) o) -> [x,y,if o == L then 0 else 1])
-                           . simplify) (reverse $ maxSort upper ts))
+                           . simplify) (maxSort upper ts))
 
 writeSimple :: JSimple -> IO ()
 writeSimple s = do
@@ -66,15 +66,15 @@ instance ToJSON JWeighted
 weighted :: Input -> WeightedTarps
 weighted (Input (a,b) _ ts) = weigh (a,b) $ map (turn . (toRanges <$>)
                               . sortOut . ( ,ivs)) simp
-                          where simp = S (a,b) N:(map simplify $ reverse $ maxSort upper ts)++[S (a,b) N]
+                          where simp = S (a,b) N:(map simplify $ maxSort upper ts)++[S (a,b) N]
                                 ivs = map head . group . sort $ intervals [a,b] simp
 
 fromMaybe :: Cost -> Int
 fromMaybe Nothing  = -1
 fromMaybe (Just x) = x
 
-weJ :: Input -> JWeighted
-weJ i@(Input (a,b) _ ts) = JWeighted a b
+weightedJSON :: Input -> JWeighted
+weightedJSON i@(Input (a,b) _ ts) = JWeighted a b
                                 (map (\(S (x1,x2) o,rs)
                                   -> JTarp x1 x2 (if o == L then -1 else if o == R then 1 else 0)
                                     (map (\(x,y,c) -> [x,y,fromMaybe c]) rs)) $ weighted i)

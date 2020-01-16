@@ -1,35 +1,22 @@
 module Geometry where
 
-import Prelude hiding (length)
 type Point = (Int,Int)
 
-data Triangle = Tri Point Point Point
+-- Line y = m*x+b where m and b are given
+data Line = Line Double Double
+instance Show Line where
+  show (Line m b) = "y="++show m++"*x+"++show b
 
--- right-angled triangle: length of legs and triangle
-data RTriangle = RTri Int Int Triangle
+-- get line equation from two points
+toLine :: Point -> Point -> Line
+toLine (x1,y1) (x2,y2) = let m = ((fromIntegral y2)-(fromIntegral y1))/((fromIntegral x2) - (fromIntegral x1)) :: Double
+                             b = -m*(fromIntegral x1) + (fromIntegral y1) :: Double
+                             in Line m b
 
-sqr :: (Num a) => a -> a
-sqr x = x*x
+-- calculate y-value for given x-value on line
+yLine :: Double -> Line -> Double
+yLine x (Line m b) = m*x+b
 
--- length of a line
-length :: Point -> Point -> Double
-length (x1,y1) (x2,y2) = (sqrt . fromIntegral) $ (sqr $ x1-x2) + (sqr $ y1-y2)
-
--- area of triangle using heron's formula
-area :: Triangle -> Double
-area (Tri p1 p2 p3) = sqrt $ s * (s-a) * (s-b) * (s-c)
-                      where a = length p1 p2
-                            b = length p2 p3
-                            c = length p3 p1
-                            s = (a+b+c)/2
-
--- area of a right-angled triangle
--- assume right angle is at p2
-areaRight :: RTriangle -> Double
-areaRight (RTri a b _) = (fromIntegral $ a*b)/2
-
--- check whether a point is inside a right-angled triangle
-pointInside :: Point -> RTriangle -> Bool
-pointInside q t@(RTri _ _ (Tri p1 p2 p3)) = areaRight t == sum [area $ Tri q p1 p2,
-                                                                area $ Tri q p1 p3,
-                                                                area $ Tri q p2 p3]
+-- is a point above the line?
+pointAbove :: Point -> Line -> Bool
+pointAbove (p1,p2) g = (yLine (fromIntegral p1) g) - (fromIntegral p2) < 0
