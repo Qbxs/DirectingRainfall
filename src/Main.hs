@@ -22,7 +22,7 @@ parse ("-s":fs)         = parse fs >>= simplify
 parse ("--simplify":fs) = parse fs >>= simplify
 parse ("-w":fs)         = parse fs >>= weighing
 parse ("--weigh":fs)    = parse fs >>= weighing
-parse (('-':_):_)       = die "Error: Unknown command"
+parse (('-':_):_)       = die "Error: Unknown command. Try -h for help."
 parse []                = getContents
 parse fs                = concat <$> mapM readFile fs
 

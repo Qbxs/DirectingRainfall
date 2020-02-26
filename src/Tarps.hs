@@ -39,14 +39,13 @@ upper t1@(T a@(a1,a2) b@(b1,b2)) t2@(T c@(c1,c2) d@(d1,d2))
 
 
 -- quadratic but safe sorting (upper is not transitive)
--- result is in reverse order
 maxSort :: Eq a => (a -> a -> Maybe Bool) -> [a] -> [a]
 maxSort p [] = []
 maxSort p ts  = maxSort p (ts\\m) ++ m
               where m = [t | t<-ts, all (fromMaybe True . p t) $ ts\\[t]]
 
 -- simplified tarp after sort without y-coordinates: (x1,x2)
--- if x1<x2 then tarp points to the left else to the right
+-- if x1<x2, then tarp points to the left, else to the right
 data SimpleTarp = S Range Orientation
   deriving (Show, Eq)
 data Orientation = L | R | N --left | right | neutral(vineyard)
