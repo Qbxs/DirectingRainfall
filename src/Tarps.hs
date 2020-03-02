@@ -93,7 +93,7 @@ minRange :: WeightedRange -> WeightedRange -> WeightedRange
 minRange (a,b,c) (_,_,z) = (a,b,minCost c z)
 
 incr :: (Num a) => a -> Maybe a
-incr x = Just $ x + 1
+incr = Just . (1+)
 
 -- calculate costs of an interval of a tarp based on costs of tarps above
 costAbove :: SimpleTarp -> Range -> WeightedTarps -> WeightedRange
